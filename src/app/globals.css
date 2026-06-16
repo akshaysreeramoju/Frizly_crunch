@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-burgundy: #6B1E1E;
+  --color-brand-burgundy-lt: #8B2E2E;
+  --color-brand-sage: #7A8F6A;
+  --color-brand-sage-lt: #9AAD88;
+  --color-brand-gold: #D4AF37;
+  --color-brand-gold-lt: #E8C84A;
+  --color-brand-cream: #F7F1E8;
+  --color-brand-cream-dk: #EDE4D6;
+  --color-brand-dark: #1A1008;
+  --color-brand-dark-mid: #2E1E0F;
+  --color-brand-text: #3D2B1A;
+  --color-brand-text-lt: #6B5240;
+
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-montserrat);
+}
+
+@layer base {
+  :root {
+    --background: #F7F1E8;
+    --foreground: #3D2B1A;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+  }
+  
+  em {
+    font-style: italic;
+    color: var(--color-brand-burgundy);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-brand-cream-dk);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-brand-burgundy);
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply font-body text-xs font-semibold tracking-[0.2em] uppercase text-brand-gold mb-3 block;
+  }
+
+  .section-title {
+    @apply text-clamp-title text-brand-dark mb-4 font-display;
+  }
+
+  .section-subtitle {
+    @apply text-base text-brand-text-lt max-w-[600px] mx-auto leading-[1.8];
+  }
+
+  .section-header {
+    @apply text-center px-4 mb-12;
+  }
+
+  .section-header.light .section-title,
+  .section-header.light .section-subtitle {
+    @apply text-brand-cream;
+  }
+}
+
+@utility text-clamp-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+/* ─── Custom CSS Marquee Animation ─── */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* ─── Ring Rotation Animation ─── */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-rotate {
+  animation: rotate 20s linear infinite;
+}
+.animate-rotate-reverse {
+  animation: rotate 14s linear infinite reverse;
+}

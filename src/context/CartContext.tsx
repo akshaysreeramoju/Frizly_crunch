@@ -1,0 +1,112 @@
+'use client';
+
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { Product, CartItem } from '@/lib/types';
+
+interface CartState {
+  items: Record<string, CartItem>;
+  isCartOpen: boolean;
+}
+
+type CartAction =
+  | { type: 'ADD_ITEM'; payload: { product: Product } }
+  | { type: 'REMOVE_ITEM'; payload: { id: string } }
+  | { type: 'UPDATE_QTY'; payload: { id: string; delta: number } }
+  | { type: 'TOGGLE_CART' }
+  | { type: 'OPEN_CART' }
+  | { type: 'CLOSE_CART' }
+  | { type: 'CLEAR_CART' };
+
+const initialState: CartState = {
+  items: {},
+  isCartOpen: false,
+};
+
+function cartReducer(state: CartState, action: CartAction): CartState {
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const { product } = action.payload;
+      const existing = state.items[product.id];
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [product.id]: {
+            product,
+            qty: existing ? existing.qty + 1 : 1,
+          },
+        },
+      };
+    }
+    case 'REMOVE_ITEM': {
+      const { [action.payload.id]: removed, ...rest } = state.items;
+      return { ...state, items: rest };
+    }
+    case 'UPDATE_QTY': {
+      const { id, delta } = action.payload;
+      const existing = state.items[id];
+      if (!existing) return state;
+
+      const newQty = existing.qty + delta;
+      if (newQty <= 0) {
+        const { [id]: removed, ...rest } = state.items;
+        return { ...state, items: rest };
+      }
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [id]: { ...existing, qty: newQty },
+        },
+      };
+    }
+    case 'TOGGLE_CART':
+      return { ...state, isCartOpen: !state.isCartOpen };
+    case 'OPEN_CART':
+      return { ...state, isCartOpen: true };
+    case 'CLOSE_CART':
+      return { ...state, isCartOpen: false };
+    case 'CLEAR_CART':
+      return { ...state, items: {} };
+    default:
+      return state;
+  }
+}
+
+interface CartContextProps {
+  state: CartState;
+  dispatch: React.Dispatch<CartAction>;
+  totalItems: number;
+  cartTotal: number;
+}
+
+const CartContext = createContext<CartContextProps | undefined>(undefined);
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  const totalItems = Object.values(state.items).reduce(
+    (sum, item) => sum + item.qty,
+    0
+  );
+
+  const cartTotal = Object.values(state.items).reduce(
+    (sum, item) => sum + (item.qty * (item.product.price || 0)),
+    0
+  );
+
+  return (
+    <CartContext.Provider value={{ state, dispatch, totalItems, cartTotal }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function useCart() {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+}
