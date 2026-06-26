@@ -7,6 +7,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
@@ -74,6 +76,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  // Handle redirect result on load for mobile Google sign-in
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          closeAuthModal();
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('Redirect auth error:', err);
+        const error = err as { code?: string; message?: string };
+        if (error.code !== 'auth/popup-closed-by-user') {
+          setAuthError('Google sign-in failed. Please try again.');
+        }
+      });
+  }, []);
+
   const openAuthModal = () => { setAuthError(''); setIsAuthModalOpen(true); };
   const closeAuthModal = () => { setIsAuthModalOpen(false); setAuthError(''); };
 
@@ -81,8 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthError('');
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      closeAuthModal();
+      // Detect if user is on a mobile device to use redirect instead of popup
+      const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && (
+        /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768
+      );
+      
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
+        closeAuthModal();
+      }
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };
       if (error.code !== 'auth/popup-closed-by-user') {
