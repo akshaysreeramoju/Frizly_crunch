@@ -74,9 +74,8 @@ export function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'py-3 bg-[#F7F1E8]/90 backdrop-blur-md shadow-[0_2px_24px_rgba(107,30,30,0.12)]' : 'py-5'
-      }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-3 bg-[#F7F1E8]/90 backdrop-blur-md shadow-[0_2px_24px_rgba(107,30,30,0.12)]' : 'py-5'
+        }`}>
         <div className="max-w-[1280px] w-full mx-auto px-4 md:px-8 flex items-center justify-between gap-1 sm:gap-4">
 
           {/* Logo */}
@@ -91,7 +90,7 @@ export function Navbar() {
             />
             <div className="flex flex-col leading-tight min-w-0 truncate">
               <span className="font-display font-black text-sm sm:text-[1.35rem] tracking-[0.02em] text-brand-dark group-hover:text-brand-burgundy transition-colors truncate">
-                FRIZLY CRUNCH
+                Frizly Crunch
               </span>
               <span className="font-body text-[0.55rem] sm:text-[0.6rem] font-bold tracking-[0.25em] text-brand-text-lt/80 uppercase mt-0.5 truncate">
                 Real Food. Reinvented.
@@ -106,13 +105,11 @@ export function Navbar() {
               return (
                 <li key={link.label}>
                   <Link href={link.href}
-                    className={`relative px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                      isActive ? 'text-brand-burgundy' : 'text-brand-text hover:text-brand-burgundy'
-                    }`}>
+                    className={`relative px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-burgundy' : 'text-brand-text hover:text-brand-burgundy'
+                      }`}>
                     {link.label}
-                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-brand-gold rounded-full transition-all duration-300 ${
-                      isActive ? 'w-3/5' : 'w-0 hover:w-3/5'
-                    }`} />
+                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-brand-gold rounded-full transition-all duration-300 ${isActive ? 'w-3/5' : 'w-0 hover:w-3/5'
+                      }`} />
                   </Link>
                 </li>
               );
