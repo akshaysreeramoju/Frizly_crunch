@@ -36,7 +36,7 @@ export function Hero() {
   return (
     <section id="home" className="relative min-h-screen bg-gradient-to-br from-[#FDF6EE] via-[#F2E8D5] to-[#E8D5BE] overflow-hidden pt-32 pb-16 px-8 flex items-center">
       <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
-        
+
         {/* Content */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
@@ -48,16 +48,16 @@ export function Hero() {
             <span className="w-2 h-2 bg-brand-gold rounded-full animate-pulse" />
             100% Natural · No Additives · Made in India
           </div>
-          
+
           <h1 className="text-clamp-title font-black leading-[1.05] mb-5 text-brand-dark">
             <span className="block">Real Food.</span>
             <span className="block text-brand-burgundy italic font-display">Reinvented.</span>
           </h1>
-          
+
           <p className="text-lg text-brand-text-lt leading-[1.8] mb-8 max-w-[440px] mx-auto lg:mx-0">
             Premium freeze-dried fruits & vegetables — bursting with flavour, nutrition, and that satisfying <em className="text-brand-burgundy not-italic font-medium">crunch</em>. Nothing added, nothing lost.
           </p>
-          
+
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10">
             <Link href="#products">
               <Button>Explore Products</Button>
@@ -69,7 +69,7 @@ export function Hero() {
 
           <div className="flex items-center justify-center lg:justify-start gap-6">
             <div className="flex flex-col">
-              <span className="font-display text-3xl font-bold text-brand-burgundy leading-none">12g</span>
+              <span className="font-display text-3xl font-bold text-brand-burgundy leading-none">50g</span>
               <span className="text-[0.7rem] font-medium text-brand-text-lt tracking-wide uppercase mt-1">Net Weight</span>
             </div>
             <div className="w-[1px] h-10 bg-brand-cream-dk" />
@@ -93,7 +93,7 @@ export function Hero() {
           className="relative z-10 flex items-center justify-center h-[400px]"
         >
           <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] flex items-center justify-center">
-            
+
             {/* Rings */}
             <div className="absolute inset-0 rounded-full border-2 border-dashed border-brand-gold/25 animate-rotate" />
             <div className="absolute inset-[12.5%] rounded-full border-2 border-dashed border-brand-burgundy/15 animate-rotate-reverse" />
@@ -122,7 +122,7 @@ export function Hero() {
             >
               {BADGES[imgIdx][0]}
             </motion.div>
-            
+
             <motion.div
               animate={{ y: [0, -10, 0], rotate: [-2, 2, -2] }}
               transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.5 }}
@@ -130,7 +130,7 @@ export function Hero() {
             >
               {BADGES[imgIdx][1]}
             </motion.div>
-            
+
             <motion.div
               animate={{ y: [0, -12, 0], rotate: [2, -2, 2] }}
               transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 1 }}
