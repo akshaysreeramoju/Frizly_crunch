@@ -18,7 +18,7 @@ export function Products() {
   );
 
   return (
-    <section id="products" className="py-24 px-8 max-w-[1280px] mx-auto">
+    <section id="products" className="py-24 px-4 md:px-8 max-w-[1280px] mx-auto">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ export function Products() {
       {/* Grid */}
       <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <AnimatePresence>
-          {filteredProducts.map((product) => (
+          {filteredProducts.map((product, index) => (
             <motion.div
               layout
               initial={{ opacity: 0, scale: 0.9 }}
@@ -63,7 +63,11 @@ export function Products() {
               transition={{ duration: 0.3 }}
               key={product.id}
             >
-              <ProductCard product={product} onQuickView={setQuickViewProduct} />
+              <ProductCard 
+                product={product} 
+                onQuickView={setQuickViewProduct} 
+                priority={index < 4}
+              />
             </motion.div>
           ))}
         </AnimatePresence>

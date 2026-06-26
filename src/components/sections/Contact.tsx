@@ -5,8 +5,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Mail, Globe, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Phone, Mail, Globe, CheckCircle2 } from 'lucide-react';
+
+// Instagram SVG icon (lucide-react v1 doesn't include it)
+const InstagramIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+  </svg>
+);
 import { Button } from '@/components/ui/Button';
+import { SITE_CONFIG } from '@/lib/siteConfig';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -63,10 +73,10 @@ export function Contact() {
 
           <div className="flex flex-col gap-5">
             {[
-              { icon: Phone, label: 'Customer Care', value: '+91 98765 43210' },
-              { icon: Mail, label: 'Email', value: 'hello@frizlycrunch.com' },
-              { icon: Globe, label: 'Website', value: 'www.frizlycrunch.com' },
-              { icon: Smartphone, label: 'Follow Us', value: '@frizlycrunch' },
+              { icon: Phone, label: 'Customer Care', value: SITE_CONFIG.contact.phone, href: `tel:${SITE_CONFIG.contact.phone.replace(/\s/g, '')}` },
+              { icon: Mail, label: 'Email', value: SITE_CONFIG.contact.email, href: `mailto:${SITE_CONFIG.contact.email}` },
+              { icon: Globe, label: 'Website', value: SITE_CONFIG.contact.website, href: `https://${SITE_CONFIG.contact.website}` },
+              { icon: InstagramIcon, label: 'Follow Us', value: SITE_CONFIG.social.instagramHandle, href: SITE_CONFIG.social.instagram },
             ].map((item, i) => (
               <motion.div
                 key={item.label}
@@ -83,9 +93,13 @@ export function Contact() {
                   <strong className="block text-[0.78rem] font-bold tracking-[0.05em] uppercase text-brand-text-lt mb-0.5">
                     {item.label}
                   </strong>
-                  <span className="text-[0.9rem] text-brand-text font-medium">
-                    {item.value}
-                  </span>
+                  {item.href ? (
+                    <a href={item.href} className="text-[0.9rem] text-brand-text font-medium hover:text-brand-burgundy transition-colors">
+                      {item.value}
+                    </a>
+                  ) : (
+                    <span className="text-[0.9rem] text-brand-text font-medium">{item.value}</span>
+                  )}
                 </div>
               </motion.div>
             ))}

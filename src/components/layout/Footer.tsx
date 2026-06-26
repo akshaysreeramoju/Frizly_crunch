@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SITE_CONFIG } from '@/lib/siteConfig';
 
 export function Footer() {
   return (
@@ -52,9 +53,19 @@ export function Footer() {
           <div>
             <h4 className="font-display font-bold text-[0.95rem] text-brand-gold mb-4">Connect</h4>
             <ul className="flex flex-col gap-2.5">
-              <li><a href="#" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Instagram</a></li>
-              <li><a href="#" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Facebook</a></li>
-              <li><a href="#" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Twitter/X</a></li>
+              {SITE_CONFIG.social.instagram && (
+                <li><a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Instagram</a></li>
+              )}
+              {SITE_CONFIG.social.facebook && (
+                <li><a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Facebook</a></li>
+              )}
+              {SITE_CONFIG.social.twitter && (
+                <li><a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Twitter/X</a></li>
+              )}
+              {SITE_CONFIG.social.whatsapp && (
+                <li><a href={SITE_CONFIG.social.whatsapp} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">WhatsApp</a></li>
+              )}
+              <li><a href={`mailto:${SITE_CONFIG.contact.email}`} className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">{SITE_CONFIG.contact.email}</a></li>
             </ul>
           </div>
         </div>
@@ -63,7 +74,7 @@ export function Footer() {
 
       <div className="max-w-[1280px] mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
         <p className="text-xs text-brand-cream/35 tracking-wide">
-          © 2026 Frizly Crunch Foods Pvt. Ltd. · 456, Green Avenue, New Delhi – 110016, India
+          © {SITE_CONFIG.legal.copyrightYear} {SITE_CONFIG.legal.companyName} · {SITE_CONFIG.address.full}
         </p>
         <p className="text-xs text-brand-cream/35 tracking-wide">
           100% Natural · Freeze-Dried · Non-Fried · Non-Baked · No Preservatives

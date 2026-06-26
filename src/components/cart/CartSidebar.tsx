@@ -1,24 +1,32 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { X, ShoppingCart, Plus, Minus, Tag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { toast } from '@/components/ui/Toast';
-
 import { useRouter } from 'next/navigation';
+import { LAUNCH_TIERS } from '@/lib/coupons';
 
 export function CartSidebar() {
   const router = useRouter();
-  const { state, dispatch, totalItems, cartTotal } = useCart();
+  const { state, dispatch, totalItems, cartTotal, discountPercent, discountAmount, discountedTotal } = useCart();
+  const { user, openAuthModal } = useAuth();
   const { isCartOpen, items } = state;
 
   const cartItems = Object.values(items);
 
   const handleCheckout = () => {
+    if (!user) {
+      openAuthModal();
+      return;
+    }
     dispatch({ type: 'CLOSE_CART' });
     router.push('/checkout');
   };
+
+  // Next tier info (e.g. "Add 1 more for 10% off")
+  const nextTier = LAUNCH_TIERS.slice().reverse().find(t => t.minPacks > totalItems);
 
   return (
     <AnimatePresence>
@@ -39,18 +47,58 @@ export function CartSidebar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 right-0 h-full w-full max-w-[380px] bg-white z-[2000] shadow-[-8px_0_40px_rgba(26,16,8,0.2)] flex flex-col"
+            className="fixed top-0 right-0 h-full w-full md:max-w-[400px] bg-white z-[2000] shadow-[-8px_0_40px_rgba(26,16,8,0.2)] flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-brand-cream-dk">
-              <h3 className="font-display text-xl text-brand-dark">Your Cart</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-xl text-brand-dark">Your Cart</h3>
+                {totalItems > 0 && (
+                  <span className="w-6 h-6 rounded-full bg-brand-burgundy text-white text-xs font-bold flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => dispatch({ type: 'CLOSE_CART' })}
-                className="w-8 h-8 rounded-full bg-brand-cream-dk text-brand-text flex items-center justify-center hover:bg-brand-burgundy hover:text-white transition-colors"
+                className="p-2.5 text-brand-text-lt hover:text-brand-burgundy transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-brand-cream"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Launching Offer Strip */}
+            {cartItems.length > 0 && (
+              <div className="bg-gradient-to-r from-brand-gold/20 to-brand-gold/10 border-b border-brand-gold/30 px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-3.5 h-3.5 text-brand-gold shrink-0" />
+                  <span className="text-[0.72rem] font-bold text-brand-dark tracking-wide uppercase">
+                    🎉 Launching Offer
+                  </span>
+                </div>
+                <div className="flex gap-3 mt-1.5">
+                  {LAUNCH_TIERS.slice().reverse().map((tier) => (
+                    <div
+                      key={tier.minPacks}
+                      className={`flex items-center gap-1 text-[0.68rem] font-semibold transition-all ${
+                        totalItems >= tier.minPacks
+                          ? 'text-brand-burgundy'
+                          : 'text-brand-text-lt'
+                      }`}
+                    >
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[0.55rem] font-bold shrink-0 ${
+                        totalItems >= tier.minPacks
+                          ? 'bg-brand-gold text-brand-dark'
+                          : 'bg-brand-cream-dk text-brand-text-lt'
+                      }`}>
+                        {totalItems >= tier.minPacks ? '✓' : tier.minPacks}
+                      </span>
+                      {tier.percent}% off
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto p-6">
@@ -77,7 +125,9 @@ export function CartSidebar() {
                         <span className="text-2xl">{product.emoji}</span>
                         <div className="flex-1">
                           <div className="font-semibold text-sm text-brand-dark">{product.name}</div>
-                          <div className="text-[0.7rem] text-brand-text-lt mt-0.5">Net Wt. {product.weight} • ₹{product.price}</div>
+                          <div className="text-[0.7rem] text-brand-text-lt mt-0.5">
+                            Net Wt. {product.weight} · ₹{product.price} each
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
@@ -96,30 +146,84 @@ export function CartSidebar() {
                         </div>
                         <button
                           onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } })}
-                          className="p-1 text-brand-text-lt hover:text-brand-burgundy transition-colors ml-2"
+                          className="p-1 text-brand-text-lt hover:text-brand-burgundy transition-colors ml-1"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </motion.div>
                     ))}
                   </AnimatePresence>
+
+                  {/* Upsell nudge */}
+                  {nextTier && (
+                    <motion.div
+                      layout
+                      className="mt-2 p-3 bg-brand-cream rounded-xl text-center text-[0.75rem] text-brand-text-lt leading-relaxed"
+                    >
+                      Add <strong className="text-brand-burgundy">{nextTier.minPacks - totalItems} more pack{nextTier.minPacks - totalItems > 1 ? 's' : ''}</strong> to unlock{' '}
+                      <strong className="text-brand-burgundy">{nextTier.percent}% off!</strong> 🎉
+                    </motion.div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Footer */}
             {cartItems.length > 0 && (
-              <div className="p-6 border-t-2 border-brand-cream-dk flex flex-col gap-4 bg-gray-50/50">
-                <div className="flex justify-between items-center text-sm text-brand-text-lt">
-                  <span>Subtotal ({totalItems} items)</span>
-                  <span>₹{cartTotal}</span>
+              <div className="p-6 border-t-2 border-brand-cream-dk flex flex-col gap-3 bg-gray-50/50">
+                {/* Price breakdown */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-sm text-brand-text-lt">
+                    <span>Subtotal ({totalItems} pack{totalItems !== 1 ? 's' : ''})</span>
+                    <span>₹{cartTotal}</span>
+                  </div>
+
+                  <AnimatePresence>
+                    {discountAmount > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex justify-between items-center text-sm font-semibold text-brand-sage"
+                      >
+                        <span>🎉 {discountPercent}% Launching Offer</span>
+                        <span>−₹{discountAmount}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="flex justify-between items-center text-sm text-brand-text-lt">
+                    <span>Shipping</span>
+                    <span className="text-green-600 font-semibold text-xs">FREE</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center font-bold text-lg text-brand-dark">
+
+                <div className="border-t border-brand-cream-dk pt-2 flex justify-between items-center font-bold text-lg text-brand-dark">
                   <span>Total</span>
-                  <span>₹{cartTotal}</span>
+                  <div className="text-right">
+                    <span className="text-2xl font-display text-brand-burgundy">₹{discountedTotal}</span>
+                    {discountAmount > 0 && (
+                      <span className="block text-[0.65rem] font-medium text-brand-text-lt line-through">₹{cartTotal}</span>
+                    )}
+                  </div>
                 </div>
-                <Button fullWidth onClick={handleCheckout}>
-                  Proceed to Checkout
+
+                {/* Savings badge */}
+                <AnimatePresence>
+                  {discountAmount > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-brand-sage/10 border border-brand-sage/25 rounded-xl px-3 py-2 text-center text-[0.75rem] font-semibold text-brand-sage"
+                    >
+                      🎊 You&apos;re saving ₹{discountAmount} on this order!
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Button fullWidth onClick={handleCheckout} id="cart-checkout-btn">
+                  Proceed to Checkout · ₹{discountedTotal}
                 </Button>
               </div>
             )}

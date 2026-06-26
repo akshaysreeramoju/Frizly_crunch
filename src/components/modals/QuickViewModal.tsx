@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/Toast';
 
 interface QuickViewModalProps {
@@ -16,6 +17,7 @@ interface QuickViewModalProps {
 
 export function QuickViewModal({ product, onClose }: QuickViewModalProps) {
   const { dispatch } = useCart();
+  const { user, openAuthModal } = useAuth();
 
   useEffect(() => {
     if (product) {
@@ -27,6 +29,12 @@ export function QuickViewModal({ product, onClose }: QuickViewModalProps) {
 
   const handleAdd = () => {
     if (!product) return;
+    if (!user) {
+      onClose();
+      openAuthModal();
+      toast('🔒 Please login to add items to cart');
+      return;
+    }
     dispatch({ type: 'ADD_ITEM', payload: { product } });
     toast(`🛒 ${product.name} added to cart!`);
     onClose();

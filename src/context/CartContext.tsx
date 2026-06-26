@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Product, CartItem } from '@/lib/types';
+import { getAutoDiscount } from '@/lib/coupons';
 
 interface CartState {
   items: Record<string, CartItem>;
@@ -40,6 +41,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case 'REMOVE_ITEM': {
       const { [action.payload.id]: removed, ...rest } = state.items;
+      void removed;
       return { ...state, items: rest };
     }
     case 'UPDATE_QTY': {
@@ -50,6 +52,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       const newQty = existing.qty + delta;
       if (newQty <= 0) {
         const { [id]: removed, ...rest } = state.items;
+        void removed;
         return { ...state, items: rest };
       }
 
@@ -79,6 +82,12 @@ interface CartContextProps {
   dispatch: React.Dispatch<CartAction>;
   totalItems: number;
   cartTotal: number;
+  /** Discount percentage applied automatically based on quantity (5/10/15%) */
+  discountPercent: number;
+  /** Amount saved in ₹ */
+  discountAmount: number;
+  /** Final amount after discount — use this for payments */
+  discountedTotal: number;
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -96,8 +105,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
+  // Auto-discount: computed live whenever totalItems changes
+  const discountPercent = getAutoDiscount(totalItems);
+  const discountAmount = Math.round((cartTotal * discountPercent) / 100);
+  const discountedTotal = cartTotal - discountAmount;
+
   return (
-    <CartContext.Provider value={{ state, dispatch, totalItems, cartTotal }}>
+    <CartContext.Provider value={{
+      state,
+      dispatch,
+      totalItems,
+      cartTotal,
+      discountPercent,
+      discountAmount,
+      discountedTotal,
+    }}>
       {children}
     </CartContext.Provider>
   );

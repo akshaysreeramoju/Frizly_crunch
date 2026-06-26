@@ -3,17 +3,25 @@
 import Image from 'next/image';
 import { Product } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/Toast';
 
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
+  priority?: boolean;
 }
 
-export function ProductCard({ product, onQuickView }: ProductCardProps) {
+export function ProductCard({ product, onQuickView, priority = false }: ProductCardProps) {
   const { dispatch } = useCart();
+  const { user, openAuthModal } = useAuth();
 
   const handleAdd = () => {
+    if (!user) {
+      openAuthModal();
+      toast('🔒 Please login to add items to cart');
+      return;
+    }
     dispatch({ type: 'ADD_ITEM', payload: { product } });
     toast(`🛒 ${product.name} added to cart!`);
   };
@@ -35,6 +43,7 @@ export function ProductCard({ product, onQuickView }: ProductCardProps) {
           src={product.img}
           alt={product.name}
           fill
+          priority={priority}
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, 300px"
         />
@@ -80,7 +89,7 @@ export function ProductCard({ product, onQuickView }: ProductCardProps) {
           </div>
           <button
             onClick={handleAdd}
-            className="font-body text-[0.78rem] font-bold text-white bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt px-4 py-2 rounded-full tracking-wide hover:from-brand-gold hover:to-brand-gold-lt hover:text-brand-dark hover:scale-105 hover:shadow-sm transition-all"
+            className="font-body text-[0.78rem] font-bold text-white bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt px-5 py-2.5 min-h-[44px] flex items-center justify-center rounded-full tracking-wide hover:from-brand-gold hover:to-brand-gold-lt hover:text-brand-dark hover:scale-105 hover:shadow-sm transition-all"
           >
             + Add
           </button>
