@@ -89,7 +89,7 @@ export function Navbar() {
               priority
             />
             <div className="flex flex-col leading-tight min-w-0 truncate">
-              <span className="font-display font-black text-sm sm:text-[1.35rem] tracking-[0.02em] text-brand-dark group-hover:text-brand-burgundy transition-colors truncate">
+              <span className="font-display font-bold text-sm sm:text-[1.35rem] tracking-[0.02em] text-brand-dark group-hover:text-brand-burgundy transition-colors truncate">
                 Frizly Crunch
               </span>
               <span className="font-body text-[0.55rem] sm:text-[0.6rem] font-bold tracking-[0.25em] text-brand-text-lt/80 uppercase mt-0.5 truncate">

@@ -55,27 +55,27 @@ export function BrandLogo({ size = 'md', className = '', iconOnly = false }: Bra
           <div className="flex flex-col leading-none">
             <span
               style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "var(--font-display), serif",
                 fontSize: titleSizes[size],
-                fontWeight: 800,
+                fontWeight: 700,
                 color: '#2E7D32',
                 letterSpacing: '0.04em',
                 lineHeight: 1.05,
               }}
             >
-              FRIZLY
+              Frizly
             </span>
             <span
               style={{
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "var(--font-display), serif",
                 fontSize: titleSizes[size],
-                fontWeight: 800,
+                fontWeight: 700,
                 color: '#4B2E1E',
                 letterSpacing: '0.04em',
                 lineHeight: 1.05,
               }}
             >
-              CRUNCH
+              Crunch
             </span>
           </div>
         )}

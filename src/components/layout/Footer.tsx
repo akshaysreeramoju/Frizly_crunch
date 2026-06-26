@@ -18,7 +18,7 @@ export function Footer() {
               className="w-11 h-10 object-contain shrink-0"
             />
             <div className="flex flex-col">
-              <span className="font-display font-bold text-[1.1rem] text-brand-cream tracking-wide">FRIZLY CRUNCH</span>
+              <span className="font-display font-bold text-[1.1rem] text-brand-cream tracking-wide">Frizly Crunch</span>
               <span className="text-[0.6rem] font-medium tracking-[0.15em] text-brand-gold">— REAL FOOD. REINVENTED. —</span>
             </div>
           </div>
