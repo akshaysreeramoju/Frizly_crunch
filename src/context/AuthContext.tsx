@@ -100,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthError('');
     try {
       const provider = new GoogleAuthProvider();
-      // Detect if user is on a mobile device to use redirect instead of popup
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
       const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && (
         /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768
       );
@@ -108,12 +111,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isMobile) {
         await signInWithRedirect(auth, provider);
       } else {
-        await signInWithPopup(auth, provider);
-        closeAuthModal();
+        try {
+          await signInWithPopup(auth, provider);
+          closeAuthModal();
+        } catch (popupErr: any) {
+          if (popupErr?.code === 'auth/popup-blocked') {
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw popupErr;
+          }
+        }
       }
     } catch (err: unknown) {
+      console.error('Google sign-in error:', err);
       const error = err as { code?: string; message?: string };
-      if (error.code !== 'auth/popup-closed-by-user') {
+      if (
+        error.code !== 'auth/popup-closed-by-user' &&
+        error.code !== 'auth/cancelled-popup-request'
+      ) {
         setAuthError('Google sign-in failed. Please try again.');
       }
     }
