@@ -80,14 +80,15 @@ export function Navbar() {
         <div className="max-w-[1280px] w-full mx-auto px-4 md:px-8 flex items-center justify-between gap-1 sm:gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-brand-burgundy rounded-xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden">
-              <svg viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 2C17 8 8 10 4 16C2 19 3 23 6 25C9 27 13 26 15 23C16 21 16 18 18 16C19 15 20 15 20 15" fill="#6B1E1E" />
-                <path d="M20 2C23 8 32 10 36 16C38 19 37 23 34 25C31 27 27 26 25 23C24 21 24 18 22 16C21 15 20 15 20 15" fill="#7A8F6A" />
-                <line x1="20" y1="15" x2="20" y2="36" stroke="#D4AF37" strokeWidth="2" />
-              </svg>
-            </div>
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group min-w-0">
+            <Image
+              src="/images/logo.png"
+              alt="Frizly Crunch Logo"
+              width={48}
+              height={48}
+              className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain shrink-0"
+              priority
+            />
             <div className="flex flex-col leading-tight min-w-0 truncate">
               <span className="font-display font-black text-sm sm:text-[1.35rem] tracking-[0.02em] text-brand-dark group-hover:text-brand-burgundy transition-colors truncate">
                 FRIZLY CRUNCH

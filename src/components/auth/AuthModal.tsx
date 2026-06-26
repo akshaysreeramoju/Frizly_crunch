@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, ArrowRight, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -130,11 +131,13 @@ export function AuthModal() {
                 </button>
 
                 <div className="inline-flex items-center gap-2 mb-3">
-                  <svg viewBox="0 0 40 36" fill="none" className="w-8 h-7">
-                    <path d="M20 2C17 8 8 10 4 16C2 19 3 23 6 25C9 27 13 26 15 23C16 21 16 18 18 16C19 15 20 15 20 15" fill="#D4AF37" />
-                    <path d="M20 2C23 8 32 10 36 16C38 19 37 23 34 25C31 27 27 26 25 23C24 21 24 18 22 16C21 15 20 15 20 15" fill="#7A8F6A" />
-                    <line x1="20" y1="15" x2="20" y2="36" stroke="#F7F1E8" strokeWidth="2" />
-                  </svg>
+                  <Image
+                    src="/images/logo-gold.png"
+                    alt="Frizly Crunch Gold Logo"
+                    width={32}
+                    height={28}
+                    className="w-8 h-7 object-contain shrink-0"
+                  />
                   <span className="text-brand-cream font-display font-bold text-lg tracking-wide">FRIZLY CRUNCH</span>
                 </div>
 

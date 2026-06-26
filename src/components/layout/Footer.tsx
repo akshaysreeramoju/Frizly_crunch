@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { SITE_CONFIG } from '@/lib/siteConfig';
 
 export function Footer() {
@@ -9,11 +10,13 @@ export function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-3.5 mb-5">
-            <svg viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-11 h-10">
-              <path d="M20 2C17 8 8 10 4 16C2 19 3 23 6 25C9 27 13 26 15 23C16 21 16 18 18 16C19 15 20 15 20 15" fill="#D4AF37"/>
-              <path d="M20 2C23 8 32 10 36 16C38 19 37 23 34 25C31 27 27 26 25 23C24 21 24 18 22 16C21 15 20 15 20 15" fill="#7A8F6A"/>
-              <line x1="20" y1="15" x2="20" y2="36" stroke="#F7F1E8" strokeWidth="2"/>
-            </svg>
+            <Image
+              src="/images/logo-gold.png"
+              alt="Frizly Crunch Gold Logo"
+              width={44}
+              height={40}
+              className="w-11 h-10 object-contain shrink-0"
+            />
             <div className="flex flex-col">
               <span className="font-display font-bold text-[1.1rem] text-brand-cream tracking-wide">FRIZLY CRUNCH</span>
               <span className="text-[0.6rem] font-medium tracking-[0.15em] text-brand-gold">— REAL FOOD. REINVENTED. —</span>
