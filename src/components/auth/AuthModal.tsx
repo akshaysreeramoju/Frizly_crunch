@@ -49,7 +49,11 @@ export function AuthModal() {
     setTimeout(resetModal, 400);
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     await signInWithGoogle();
     resetModal();
   };
@@ -165,8 +169,15 @@ export function AuthModal() {
                       className="flex flex-col gap-4">
 
                       {/* Google Button */}
-                      <button onClick={handleGoogleLogin}
-                        className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 transition-all">
+                      <button 
+                        onClick={handleGoogleLogin}
+                        onTouchEnd={(e) => {
+                          e.preventDefault();
+                          handleGoogleLogin(e);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 transition-all"
+                      >
                         <GoogleIcon />
                         Continue with Google
                       </button>
