@@ -104,22 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         prompt: 'select_account'
       });
       
-      const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && (
-        /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768
-      );
-      
-      if (isMobile) {
-        await signInWithRedirect(auth, provider);
-      } else {
-        try {
-          await signInWithPopup(auth, provider);
-          closeAuthModal();
-        } catch (popupErr: any) {
-          if (popupErr?.code === 'auth/popup-blocked') {
-            await signInWithRedirect(auth, provider);
-          } else {
-            throw popupErr;
-          }
+      try {
+        await signInWithPopup(auth, provider);
+        closeAuthModal();
+      } catch (popupErr: any) {
+        if (popupErr?.code === 'auth/popup-blocked') {
+          await signInWithRedirect(auth, provider);
+        } else {
+          throw popupErr;
         }
       }
     } catch (err: unknown) {
@@ -137,16 +129,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sendOTP = async (phone: string, recaptchaContainerId: string) => {
     setAuthError('');
     try {
+      // Clear existing verifier if any to prevent "already initialized" errors
+      const win = window as any;
+      if (win.recaptchaVerifier) {
+        try {
+          win.recaptchaVerifier.clear();
+        } catch (e) {
+          console.error('Error clearing recaptcha verifier:', e);
+        }
+      }
+
       // Create invisible reCAPTCHA
       const recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerId, {
         size: 'invisible',
         callback: () => {},
       });
+      
+      win.recaptchaVerifier = recaptchaVerifier;
       confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
     } catch (err: unknown) {
-      const error = err as { message?: string };
+      const error = err as { code?: string; message?: string };
       console.error('OTP error:', error);
-      setAuthError('Failed to send OTP. Check the number and try again.');
+      
+      let errMsg = 'Failed to send OTP. ';
+      if (error.code) {
+        if (error.code === 'auth/operation-not-allowed') {
+          errMsg += 'Phone sign-in is not enabled in the Firebase Console.';
+        } else if (error.code === 'auth/billing-not-enabled') {
+          errMsg += 'Firebase project must be on the Blaze plan for Phone Auth, or the SMS region is not enabled in Firebase settings.';
+        } else if (error.code === 'auth/invalid-phone-number') {
+          errMsg += 'Invalid phone number format.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errMsg += 'Too many requests. Please try again later.';
+        } else if (error.code === 'auth/unauthorized-domain') {
+          errMsg += 'This domain is not authorized in the Firebase Console.';
+        } else {
+          errMsg += `(${error.code})`;
+        }
+      } else if (error.message) {
+        errMsg += error.message;
+      } else {
+        errMsg += 'Check the number and try again.';
+      }
+      
+      setAuthError(errMsg);
       throw error;
     }
   };
