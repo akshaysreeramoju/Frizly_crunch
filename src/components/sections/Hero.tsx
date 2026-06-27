@@ -55,7 +55,7 @@ export function Hero() {
           </h1>
 
           <p className="text-lg text-brand-text-lt leading-[1.8] mb-8 max-w-[440px] mx-auto lg:mx-0">
-            Premium freeze-dried fruits & vegetables — bursting with flavour, nutrition, and that satisfying <em className="text-brand-burgundy not-italic font-medium">crunch</em>. Nothing added, nothing lost.
+            Premium freeze-dried fruits & vegetables — bursting with flavour, nutrition, and that satisfying <em className="text-brand-burgundy not-italic font-medium">crunch</em>. 100% natural, pure goodness preserved.
           </p>
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10">

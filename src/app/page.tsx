@@ -3,7 +3,7 @@ import { MarqueeStrip } from "@/components/sections/MarqueeStrip";
 import { Products } from "@/components/sections/Products";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { Process } from "@/components/sections/Process";
-import { Testimonials } from "@/components/sections/Testimonials";
+
 import { Uses } from "@/components/sections/Uses";
 import { Contact } from "@/components/sections/Contact";
 
@@ -15,7 +15,7 @@ export default function Home() {
       <Products />
       <WhyUs />
       <Process />
-      <Testimonials />
+
       <Uses />
       <Contact />
     </div>

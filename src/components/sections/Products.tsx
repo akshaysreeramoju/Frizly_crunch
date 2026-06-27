@@ -28,7 +28,7 @@ export function Products() {
         <span className="section-label">Our Collection</span>
         <h2 className="section-title">Nature's Best, <em>Freeze-Dried</em></h2>
         <p className="section-subtitle">
-          Each pack contains the true essence of real fruit and vegetables — nothing added, nothing lost, just pure flavour and nutrition locked in every crunch.
+          Each pack contains the true essence of real fruit and vegetables — fully natural, goodness preserved, just pure flavour and nutrition locked in every crunch.
         </p>
       </motion.div>
 

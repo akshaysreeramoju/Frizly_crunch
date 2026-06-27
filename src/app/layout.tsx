@@ -23,7 +23,7 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: "Frizly Crunch – Real Food. Reinvented.",
-  description: "Premium freeze-dried fruits and vegetables. 100% real fruit, nothing added. No added sugar, no preservatives, no artificial colours.",
+  description: "Premium freeze-dried fruits and vegetables. 100% real fruit, purely natural. No added sugar, no preservatives, no artificial colours.",
   keywords: "freeze-dried fruit, freeze-dried vegetables, healthy snacks, natural snacks, Frizly Crunch, no added sugar, premium snacks",
 };
 

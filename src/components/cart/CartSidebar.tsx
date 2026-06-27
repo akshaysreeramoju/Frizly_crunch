@@ -15,6 +15,8 @@ export function CartSidebar() {
   const { isCartOpen, items } = state;
 
   const cartItems = Object.values(items);
+  const shippingCost = discountedTotal < 999 && discountedTotal > 0 ? 99 : 0;
+  const finalTotal = discountedTotal + shippingCost;
 
   const handleCheckout = () => {
     if (!user) {
@@ -193,17 +195,19 @@ export function CartSidebar() {
                   </AnimatePresence>
 
                   <div className="flex justify-between items-center text-sm text-brand-text-lt">
-                    <span>Shipping</span>
-                    <span className="text-green-600 font-semibold text-xs">FREE</span>
+                    <span>Shipping {discountedTotal < 999 && <span className="text-[0.65rem] text-brand-text-lt">(Free above ₹999)</span>}</span>
+                    <span className={shippingCost === 0 ? "text-green-600 font-semibold text-xs" : "text-brand-dark text-sm"}>
+                      {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
+                    </span>
                   </div>
                 </div>
 
                 <div className="border-t border-brand-cream-dk pt-2 flex justify-between items-center font-bold text-lg text-brand-dark">
                   <span>Total</span>
                   <div className="text-right">
-                    <span className="text-2xl font-display text-brand-burgundy">₹{discountedTotal}</span>
+                    <span className="text-2xl font-display text-brand-burgundy">₹{finalTotal}</span>
                     {discountAmount > 0 && (
-                      <span className="block text-[0.65rem] font-medium text-brand-text-lt line-through">₹{cartTotal}</span>
+                      <span className="block text-[0.65rem] font-medium text-brand-text-lt line-through">₹{cartTotal + shippingCost}</span>
                     )}
                   </div>
                 </div>
@@ -223,7 +227,7 @@ export function CartSidebar() {
                 </AnimatePresence>
 
                 <Button fullWidth onClick={handleCheckout} id="cart-checkout-btn">
-                  Proceed to Checkout · ₹{discountedTotal}
+                  Proceed to Checkout · ₹{finalTotal}
                 </Button>
               </div>
             )}

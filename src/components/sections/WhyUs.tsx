@@ -6,7 +6,7 @@ const REASONS = [
   {
     id: 'natural',
     title: '100% Natural',
-    desc: 'Made from real, premium-quality fruits and vegetables. Absolutely nothing artificial — no colours, no flavours, no preservatives.',
+    desc: 'Made from real, premium-quality fruits and vegetables. Completely natural — zero artificial colours, zero flavours, zero preservatives.',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" className="w-full h-full">
         <circle cx="24" cy="24" r="22" fill="#F7F1E8" stroke="#6B1E1E" strokeWidth="2"/>
@@ -56,7 +56,7 @@ const REASONS = [
   {
     id: 'sugar',
     title: 'No Added Sugar',
-    desc: 'Only the natural sugars present in the fruit itself. Perfect for health-conscious consumers and diabetics.',
+    desc: 'Only the natural sugars present in the fruit itself. Perfect for health-conscious consumers.',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" className="w-full h-full">
         <circle cx="24" cy="24" r="22" fill="#F7F1E8" stroke="#6B1E1E" strokeWidth="2"/>

@@ -22,6 +22,12 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [couponDiscountPercent, setCouponDiscountPercent] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -64,6 +70,38 @@ export default function CheckoutPage() {
     );
   }
 
+  const effectiveDiscountPercent = appliedCoupon ? couponDiscountPercent : discountPercent;
+  const effectiveDiscountAmount = Math.round((cartTotal * effectiveDiscountPercent) / 100);
+  const subTotalAfterDiscount = cartTotal - effectiveDiscountAmount;
+  const shippingCost = subTotalAfterDiscount < 999 && subTotalAfterDiscount > 0 ? 99 : 0;
+  const finalTotal = subTotalAfterDiscount + shippingCost;
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponError('');
+    try {
+      const res = await fetch('/api/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedCoupon(couponInput.trim().toUpperCase());
+        setCouponDiscountPercent(data.discountPercent);
+        setCouponInput('');
+        toast('✅ Coupon applied successfully!');
+      } else {
+        setCouponError(data.message);
+      }
+    } catch {
+      setCouponError('Failed to apply coupon.');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -76,7 +114,7 @@ export default function CheckoutPage() {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: discountedTotal, currency: 'INR' }),
+        body: JSON.stringify({ amount: finalTotal, currency: 'INR' }),
       });
       const orderData = await orderRes.json();
       if (!orderData.success) throw new Error(orderData.message);
@@ -108,9 +146,11 @@ export default function CheckoutPage() {
               items: cartItems,
               shippingAddress: { ...formData },
               userId: user?.uid || null,
-              discountPercent,
-              discountAmount,
-              total: discountedTotal,
+              discountPercent: effectiveDiscountPercent,
+              discountAmount: effectiveDiscountAmount,
+              couponCode: appliedCoupon || null,
+              shippingCost,
+              total: finalTotal,
             }),
           });
           const verifyData = await verifyRes.json();
@@ -215,7 +255,7 @@ export default function CheckoutPage() {
             </div>
 
             <Button fullWidth size="lg" type="submit" disabled={isSubmitting} id="checkout-pay-btn">
-              {isSubmitting ? 'Opening Payment...' : `Pay ₹${discountedTotal} Securely →`}
+              {isSubmitting ? 'Opening Payment...' : `Pay ₹${finalTotal} Securely →`}
             </Button>
 
             <p className="text-center text-xs text-brand-text-lt mt-3 flex items-center justify-center gap-1.5">
@@ -243,9 +283,34 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-              {discountPercent > 0 && (
+              {discountPercent > 0 && !appliedCoupon && (
                 <div className="mt-2 pt-2 border-t border-brand-gold/30 text-sm font-bold text-brand-burgundy">
                   ✅ {discountPercent}% off applied automatically!
+                </div>
+              )}
+            </div>
+
+            {/* Coupon Input */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-6 md:p-8 shadow-sm">
+              <h3 className="font-display font-bold text-brand-dark mb-3">Apply Coupon</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Enter code"
+                  className="flex-1 p-3 border-2 border-brand-cream-dk rounded-xl focus:border-brand-burgundy outline-none uppercase"
+                  disabled={!!appliedCoupon}
+                />
+                <Button onClick={handleApplyCoupon} disabled={!couponInput.trim() || !!appliedCoupon || isApplyingCoupon}>
+                  {isApplyingCoupon ? 'Applying...' : appliedCoupon ? 'Applied' : 'Apply'}
+                </Button>
+              </div>
+              {couponError && <p className="text-red-500 text-xs mt-2">{couponError}</p>}
+              {appliedCoupon && (
+                <div className="mt-2 text-sm text-brand-sage font-bold flex justify-between items-center bg-brand-sage/10 p-2 rounded-lg">
+                  <span>{appliedCoupon} applied ({couponDiscountPercent}% off)</span>
+                  <button onClick={() => { setAppliedCoupon(''); setCouponDiscountPercent(0); }} className="text-red-500 hover:underline text-xs">Remove</button>
                 </div>
               )}
             </div>
@@ -273,23 +338,25 @@ export default function CheckoutPage() {
                   <span>Subtotal ({totalItems} pack{totalItems !== 1 ? 's' : ''})</span>
                   <span>₹{cartTotal}</span>
                 </div>
-                <div className="flex justify-between text-sm text-brand-text-lt">
-                  <span>Shipping</span>
-                  <span className="text-green-600 font-semibold">FREE</span>
-                </div>
-                {discountAmount > 0 && (
+                {effectiveDiscountAmount > 0 && (
                   <div className="flex justify-between text-sm font-semibold text-brand-sage">
-                    <span>🎉 {discountPercent}% Launching Offer</span>
-                    <span>−₹{discountAmount}</span>
+                    <span>{appliedCoupon ? `🎉 ${appliedCoupon} Coupon` : `🎉 ${effectiveDiscountPercent}% Launching Offer`}</span>
+                    <span>−₹{effectiveDiscountAmount}</span>
                   </div>
                 )}
+                <div className="flex justify-between text-sm text-brand-text-lt">
+                  <span>Shipping {subTotalAfterDiscount < 999 && <span className="text-[0.65rem] text-brand-text-lt">(Free above ₹999)</span>}</span>
+                  <span className={shippingCost === 0 ? "text-green-600 font-semibold" : "text-brand-dark"}>
+                    {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
+                  </span>
+                </div>
                 <div className="flex justify-between font-display text-2xl font-bold text-brand-dark mt-4 pt-4 border-t border-brand-cream-dk">
                   <span>Total</span>
-                  <span className="text-brand-burgundy">₹{discountedTotal}</span>
+                  <span className="text-brand-burgundy">₹{finalTotal}</span>
                 </div>
-                {discountAmount > 0 && (
+                {effectiveDiscountAmount > 0 && (
                   <p className="text-center text-xs text-brand-sage font-semibold mt-1">
-                    🎊 You save ₹{discountAmount} on this order!
+                    🎊 You save ₹{effectiveDiscountAmount} on this order!
                   </p>
                 )}
               </div>
