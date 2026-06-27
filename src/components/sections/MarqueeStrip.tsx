@@ -1,7 +1,7 @@
 import React from 'react';
 
 const FLAVOURS = [
-  '🍓 Strawberry', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
+  '🍏 Custard Apple', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
   '🫐 Pink Guava', '🟠 Papaya', '🟤 Chikoo', '🟢 Amla', '🥕 Carrot',
   '🌽 Sweetcorn', '🟣 Beetroot'
 ];

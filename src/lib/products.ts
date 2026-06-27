@@ -1,13 +1,13 @@
 import { Product } from './types';
 
 export const PRODUCTS: Record<string, Product> = {
-  strawberry: {
-    id: 'strawberry',
-    name: 'Strawberry',
+  'custard-apple': {
+    id: 'custard-apple',
+    name: 'Custard Apple',
     category: 'fruit',
-    emoji: '🍓',
-    img: '/images/products/strawberry.jpg',
-    desc: 'Our freeze-dried strawberries capture the essence of sun-ripened berries at their peak. Each piece delivers a concentrated burst of sweet, tangy flavour with an incredible crispy crunch. Perfect as a standalone snack or a flavourful addition to your morning cereal.',
+    emoji: '🍏',
+    img: '/images/products/custard-apple.jpg',
+    desc: 'Our freeze-dried custard apple captures the essence of sun-ripened fruit at its peak. Each piece delivers a concentrated burst of sweet, creamy flavour with an incredible crispy crunch. Perfect as a standalone snack or a flavourful addition to your morning cereal.',
     benefits: ['Rich in Vitamin C', 'No Added Sugar', 'No Preservatives', 'No Artificial Colours'],
     weight: '12g',
     price: 149

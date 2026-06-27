@@ -26,7 +26,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
     toast(`🛒 ${product.name} added to cart!`);
   };
 
-  const isBestseller = ['strawberry', 'mango'].includes(product.id);
+  const isBestseller = ['custard-apple', 'mango'].includes(product.id);
 
   return (
     <div className="group rounded-[24px] bg-white overflow-hidden shadow-sm hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(107,30,30,0.20)] transition-all duration-300 relative flex flex-col h-full border border-brand-cream-dk">

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { ChevronDown } from 'lucide-react';
 
 const HERO_IMAGES = [
-  '/images/products/strawberry.jpg',
+  '/images/products/custard-apple.jpg',
   '/images/products/mango.jpg',
   '/images/products/pineapple.jpg',
   '/images/products/guava.jpg',
@@ -16,7 +16,7 @@ const HERO_IMAGES = [
 ];
 
 const BADGES = [
-  ['🍓 Strawberry', '🥭 Mango', '🍍 Pineapple'],
+  ['🍏 Custard Apple', '🥭 Mango', '🍍 Pineapple'],
   ['🥭 Mango', '🍌 Banana', '🎯 Natural'],
   ['🍍 Pineapple', '💚 Healthy', '✨ Pure'],
   ['🫐 Pink Guava', '🌿 Natural', '🔥 Tasty'],

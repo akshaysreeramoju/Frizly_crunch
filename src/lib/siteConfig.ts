@@ -17,7 +17,7 @@ export const SITE_CONFIG = {
 
   contact: {
     /** Customer-facing phone number (also WhatsApp) */
-    phone: '+91 98765 43210', // ← REPLACE with your actual number
+    phone: '+91 9391302567', // ← REPLACE with your actual number
     /** Public business email */
     email: 'hello@frizlycrunch.com', // ← REPLACE
     /** Website URL */
@@ -31,7 +31,7 @@ export const SITE_CONFIG = {
     instagramHandle: '@frizlycrunch', // ← REPLACE
     facebook: '', // ← Add URL when available
     twitter: '',  // ← Add URL when available
-    whatsapp: 'https://wa.me/919876543210', // ← REPLACE with actual number
+    whatsapp: 'https://wa.me/919391302567', // ← REPLACE with actual number
   },
 
   address: {
