@@ -31,9 +31,17 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
           <p className="text-[0.8rem] font-bold tracking-[0.1em] uppercase text-brand-text-lt mb-1">
             Order ID
           </p>
-          <p className="font-display text-2xl font-bold text-brand-burgundy tracking-wider">
+          <p className="font-display text-2xl font-bold text-brand-burgundy tracking-wider mb-4">
             {orderId}
           </p>
+          <div className="border-t border-brand-cream-dk/50 pt-4 mt-4">
+            <p className="text-[0.8rem] font-bold tracking-[0.1em] uppercase text-brand-text-lt mb-1">
+              Estimated Delivery
+            </p>
+            <p className="text-brand-dark font-medium">
+              {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

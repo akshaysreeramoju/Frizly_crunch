@@ -35,7 +35,7 @@ export function Footer() {
         </div>
 
         {/* Links */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <h4 className="font-display font-bold text-[0.95rem] text-brand-gold mb-4">Products</h4>
             <ul className="flex flex-col gap-2.5">
@@ -48,9 +48,17 @@ export function Footer() {
             <h4 className="font-display font-bold text-[0.95rem] text-brand-gold mb-4">Company</h4>
             <ul className="flex flex-col gap-2.5">
               <li><Link href="/track" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Track Order</Link></li>
-              <li><Link href="/#why-us" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">About Us</Link></li>
-              <li><Link href="/#process" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Our Process</Link></li>
-              <li><Link href="/#contact" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Contact</Link></li>
+              <li><Link href="/about" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">About Us</Link></li>
+              <li><Link href="/contact" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Contact</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-display font-bold text-[0.95rem] text-brand-gold mb-4">Legal</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><Link href="/privacy-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Privacy Policy</Link></li>
+              <li><Link href="/terms-and-conditions" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Terms & Conditions</Link></li>
+              <li><Link href="/return-refund-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Return Policy</Link></li>
+              <li><Link href="/shipping-delivery-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Shipping Policy</Link></li>
             </ul>
           </div>
           <div>

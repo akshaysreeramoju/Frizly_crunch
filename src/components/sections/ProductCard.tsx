@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Product } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -37,8 +38,8 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
         </div>
       )}
 
-      {/* Image Wrap */}
-      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-brand-cream to-brand-cream-dk">
+      {/* Image Wrap — clicking navigates to product detail page */}
+      <Link href={`/products/${product.id}`} className="block relative aspect-square overflow-hidden bg-gradient-to-br from-brand-cream to-brand-cream-dk">
         <Image
           src={product.img}
           alt={product.name}
@@ -51,22 +52,33 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
         {/* Overlay */}
         <div className="absolute inset-0 bg-brand-dark/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
-            onClick={() => onQuickView(product)}
+            onClick={(e) => { e.preventDefault(); onQuickView(product); }}
             className="font-body text-sm font-semibold text-brand-dark bg-brand-gold px-5 py-2.5 rounded-full translate-y-3 group-hover:translate-y-0 hover:bg-white hover:-translate-y-0.5 transition-all duration-300 tracking-wide"
           >
             Quick View
           </button>
         </div>
-      </div>
+      </Link>
 
       {/* Info */}
       <div className="p-5 flex flex-col flex-1">
         <div className="text-[0.7rem] font-semibold text-brand-sage tracking-[0.08em] uppercase mb-1.5">
           {product.category === 'fruit' ? '🍓 Fruit' : '🥕 Vegetable'}
         </div>
-        <h3 className="font-display text-xl font-bold text-brand-dark mb-1">
-          {product.name}
-        </h3>
+        <Link href={`/products/${product.id}`} className="hover:text-brand-burgundy transition-colors">
+          <h3 className="font-display text-xl font-bold text-brand-dark mb-1">
+            {product.name}
+          </h3>
+        </Link>
+        
+        {/* Mock Star Rating */}
+        <div className="flex items-center gap-1 mb-2">
+          <div className="flex text-brand-gold text-[10px]">
+            ★ ★ ★ ★ ★
+          </div>
+          <span className="text-[0.65rem] text-brand-text-lt">(4.8)</span>
+        </div>
+
         <p className="text-[0.78rem] text-brand-text-lt leading-[1.5] mb-3 line-clamp-2">
           {product.desc}
         </p>
@@ -82,18 +94,19 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
           ))}
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-brand-cream-dk">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-brand-cream-dk mb-4">
           <div>
             <div className="font-bold text-brand-dark">₹{product.price}</div>
             <div className="text-[0.65rem] font-medium text-brand-text-lt mt-0.5">Net Wt. {product.weight}</div>
           </div>
-          <button
-            onClick={handleAdd}
-            className="font-body text-[0.78rem] font-bold text-white bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt px-5 py-2.5 min-h-[44px] flex items-center justify-center rounded-full tracking-wide hover:from-brand-gold hover:to-brand-gold-lt hover:text-brand-dark hover:scale-105 hover:shadow-sm transition-all"
-          >
-            + Add
-          </button>
         </div>
+        
+        <button
+          onClick={handleAdd}
+          className="w-full font-body text-[0.78rem] font-bold text-white bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt px-5 py-3 min-h-[44px] flex items-center justify-center rounded-xl tracking-wide hover:from-brand-gold hover:to-brand-gold-lt hover:text-brand-dark hover:scale-[1.02] hover:shadow-sm transition-all"
+        >
+          + Quick Add
+        </button>
       </div>
     </div>
   );

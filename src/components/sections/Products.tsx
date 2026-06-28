@@ -38,7 +38,7 @@ export function Products() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`font-body text-sm font-semibold px-6 py-2.5 rounded-full border-2 transition-all duration-300 ${
+            className={`font-body text-sm font-semibold px-4 sm:px-6 py-2.5 rounded-full border-2 transition-all duration-300 min-h-[44px] min-w-[44px] ${
               filter === f
                 ? 'bg-brand-burgundy border-brand-burgundy text-white'
                 : 'bg-brand-cream-dk border-transparent text-brand-text-lt hover:border-brand-burgundy hover:text-brand-burgundy hover:bg-white'
@@ -52,7 +52,7 @@ export function Products() {
       </div>
 
       {/* Grid */}
-      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
         <AnimatePresence>
           {filteredProducts.map((product, index) => (
             <motion.div

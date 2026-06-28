@@ -43,16 +43,20 @@ export function CartSidebar() {
             className="fixed inset-0 bg-brand-dark/50 z-[1999] backdrop-blur-sm"
           />
 
-          {/* Sidebar */}
+          {/* Sidebar / Bottom Sheet */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 right-0 h-full w-full md:max-w-[400px] bg-white z-[2000] shadow-[-8px_0_40px_rgba(26,16,8,0.2)] flex flex-col"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-x-0 bottom-0 top-auto md:top-0 md:inset-y-0 md:right-0 md:left-auto md:bottom-auto w-full md:max-w-[400px] max-h-[85vh] md:max-h-full h-full bg-white z-[2000] rounded-t-3xl md:rounded-none shadow-[0_-8px_40px_rgba(26,16,8,0.2)] md:shadow-[-8px_0_40px_rgba(26,16,8,0.2)] flex flex-col"
           >
+            {/* Mobile Drag Handle */}
+            <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
+              <div className="w-12 h-1.5 bg-brand-cream-dk rounded-full" />
+            </div>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-brand-cream-dk">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-brand-cream-dk">
               <div className="flex items-center gap-2">
                 <h3 className="font-display text-xl text-brand-dark">Your Cart</h3>
                 {totalItems > 0 && (

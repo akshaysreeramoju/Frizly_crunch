@@ -238,24 +238,39 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Pay Button */}
-            <div className="bg-brand-burgundy/5 border border-brand-burgundy/20 rounded-2xl p-5 mb-6">
-              <div className="flex items-center gap-3 mb-1">
-                <Lock className="w-4 h-4 text-brand-burgundy" />
-                <span className="font-bold text-brand-dark text-sm">Online Payment via Razorpay</span>
+            {/* Visible Payment Options */}
+            <div className="mb-6">
+              <h3 className="text-[0.78rem] font-bold tracking-[0.05em] uppercase text-brand-text-lt mb-3">
+                Payment Method
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label className="flex items-center gap-3 p-4 border-2 border-brand-burgundy bg-brand-burgundy/5 rounded-xl cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="razorpay" defaultChecked className="w-4 h-4 text-brand-burgundy focus:ring-brand-burgundy" />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-brand-dark text-sm">Online Payment</span>
+                    <span className="text-[0.65rem] text-brand-text-lt">UPI, Cards, Netbanking</span>
+                  </div>
+                </label>
+                
+                <label className="flex items-center gap-3 p-4 border-2 border-brand-cream-dk hover:border-brand-burgundy/50 rounded-xl cursor-pointer transition-colors">
+                  <input type="radio" name="paymentMethod" value="cod" className="w-4 h-4 text-brand-burgundy focus:ring-brand-burgundy" />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-brand-dark text-sm">Cash on Delivery</span>
+                    <span className="text-[0.65rem] text-brand-text-lt">Pay when you receive</span>
+                  </div>
+                </label>
               </div>
-              <p className="text-xs text-brand-text-lt pl-7">
-                UPI · Google Pay · PhonePe · Cards · Net Banking · Wallets
-              </p>
-              <div className="flex gap-2 mt-2 pl-7 flex-wrap">
-                {['UPI', 'GPay', 'PhonePe', 'Visa', 'Mastercard', 'NetBanking'].map(m => (
-                  <span key={m} className="text-[0.65rem] font-semibold bg-white border border-brand-cream-dk text-gray-500 px-2 py-0.5 rounded">{m}</span>
-                ))}
+              <div className="flex items-center gap-2 mt-3 pl-1 opacity-70">
+                {/* Simulated payment method logos */}
+                <div className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold">UPI</div>
+                <div className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold">VISA</div>
+                <div className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold">MasterCard</div>
+                <div className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold">Razorpay</div>
               </div>
             </div>
 
-            <Button fullWidth size="lg" type="submit" disabled={isSubmitting} id="checkout-pay-btn">
-              {isSubmitting ? 'Opening Payment...' : `Pay ₹${finalTotal} Securely →`}
+            <Button fullWidth size="lg" type="submit" disabled={isSubmitting} id="checkout-pay-btn" className="sticky bottom-4 z-10 shadow-xl">
+              {isSubmitting ? 'Processing...' : `Proceed to Pay ₹${finalTotal} →`}
             </Button>
 
             <p className="text-center text-xs text-brand-text-lt mt-3 flex items-center justify-center gap-1.5">
