@@ -10,7 +10,7 @@ export const PRODUCTS: Record<string, Product> = {
     desc: 'Our freeze-dried custard apple captures the essence of sun-ripened fruit at its peak. Each piece delivers a concentrated burst of sweet, creamy flavour with an incredible crispy crunch. Perfect as a standalone snack or a flavourful addition to your morning cereal.',
     benefits: ['Rich in Vitamin C', 'No Added Sugar', 'No Preservatives', 'No Artificial Colours'],
     weight: '12g',
-    price: 149
+    price: 249
   },
   mango: {
     id: 'mango',

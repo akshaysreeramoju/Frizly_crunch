@@ -101,7 +101,7 @@ export function Process() {
           <div className="w-16 h-[1px] md:w-[1px] md:h-16 bg-brand-gold/20" />
           <Stat value="98" suffix="%" label="Moisture Removed" />
           <div className="w-16 h-[1px] md:w-[1px] md:h-16 bg-brand-gold/20" />
-          <Stat value="12" suffix="mo" label="Shelf Life" />
+          <Stat value="24" suffix="mo" label="Shelf Life" />
           <div className="w-16 h-[1px] md:w-[1px] md:h-16 bg-brand-gold/20" />
           <Stat value="10" suffix="x" label="Weight of Fresh Fruit" />
         </motion.div>
