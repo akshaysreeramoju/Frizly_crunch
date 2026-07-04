@@ -3,17 +3,20 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PRODUCTS, PRODUCT_LIST } from '@/lib/products';
 import { useCart } from '@/context/CartContext';
 import { toast } from '@/components/ui/Toast';
-import { Star, ShieldCheck, Truck, RefreshCcw, Heart, ChevronRight } from 'lucide-react';
+import { Star, ShieldCheck, Truck, RefreshCcw, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ProductCard } from '@/components/sections/ProductCard';
 
 export function ProductDetailClient({ slug }: { slug: string }) {
   const product = PRODUCTS[slug];
   const { dispatch } = useCart();
+  const galleryImages = product?.images?.length ? product.images : [product?.img];
+  const [selectedImg, setSelectedImg] = useState(0);
 
   if (!product) {
     notFound();
@@ -51,23 +54,45 @@ export function ProductDetailClient({ slug }: { slug: string }) {
           
           {/* Left: Images Gallery */}
           <div className="w-full lg:w-1/2 flex flex-col gap-4">
+            {/* Main Image */}
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-brand-cream border border-brand-cream-dk">
-              <Image 
-                src={product.img} 
-                alt={product.name} 
-                fill 
-                className="object-cover"
-                priority
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedImg}
+                  initial={{ opacity: 0, scale: 1.03 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.25 }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={galleryImages[selectedImg]}
+                    alt={`${product.name} - view ${selectedImg + 1}`}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
-            {/* Thumbnails (Mocked) */}
-            <div className="grid grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer ${i === 1 ? 'border-brand-burgundy' : 'border-transparent hover:border-brand-cream-dk'}`}>
-                  <Image src={product.img} alt={product.name} fill className="object-cover" />
-                </div>
-              ))}
-            </div>
+            {/* Thumbnails — only shown if multiple images exist */}
+            {galleryImages.length > 1 && (
+              <div className={`grid gap-3 ${galleryImages.length === 2 ? 'grid-cols-2' : galleryImages.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                {galleryImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImg(i)}
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      selectedImg === i
+                        ? 'border-brand-burgundy shadow-md scale-[1.03]'
+                        : 'border-transparent hover:border-brand-cream-dk opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Image src={img} alt={`${product.name} view ${i + 1}`} fill className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right: Info */}
@@ -76,8 +101,11 @@ export function ProductDetailClient({ slug }: { slug: string }) {
               <div className="text-xs font-bold tracking-[0.1em] uppercase text-brand-sage mb-2">
                 {product.category === 'fruit' ? '🍓 Freeze-Dried Fruit' : '🥕 Freeze-Dried Vegetable'}
               </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold text-brand-dark mb-4 leading-tight">
-                {product.name} <span className="text-3xl">{product.emoji}</span>
+              <h1 className="font-display text-4xl sm:text-5xl font-bold text-brand-dark mb-4 leading-tight flex items-center flex-wrap gap-3">
+                {product.name} 
+                <span className="inline-flex items-center justify-center w-[1.2em] h-[1.2em] rounded-full bg-brand-cream border-2 border-brand-cream-dk text-[0.7em] shadow-sm flex-shrink-0">
+                  {product.emoji}
+                </span>
               </h1>
               
               {/* Reviews */}
@@ -123,8 +151,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
               </Button>
               <div className="hidden lg:flex items-center justify-center gap-4 mt-4 text-[0.65rem] font-bold tracking-wide text-brand-text-lt uppercase">
                 <div className="flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Secure Payment</div>
-                <div className="flex items-center gap-1"><Truck className="w-4 h-4" /> Fast Delivery</div>
-                <div className="flex items-center gap-1"><RefreshCcw className="w-4 h-4" /> Easy Returns</div>
+                <div className="flex items-center gap-1"><Truck className="w-4 h-4" /> Free Delivery above ₹899</div>
               </div>
             </div>
           </div>

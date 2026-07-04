@@ -4,6 +4,7 @@ export interface Product {
   category: 'fruit' | 'vegetable';
   emoji: string;
   img: string;
+  images?: string[]; // optional additional gallery images
   desc: string;
   benefits: string[];
   weight: string;

@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, ArrowRight, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-
-type Step = 'choose' | 'phone' | 'otp';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" className="w-5 h-5">
@@ -18,44 +16,11 @@ const GoogleIcon = () => (
 );
 
 export function AuthModal() {
-  const { isAuthModalOpen, closeAuthModal, signInWithGoogle, sendOTP, verifyOTP, authError, setAuthError } = useAuth();
-  const [step, setStep] = useState<Step>('choose');
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [isSending, setIsSending] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Countdown timer for resend OTP
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown]);
-
-  const resetModal = () => {
-    setStep('choose');
-    setPhone('');
-    setOtp(['', '', '', '', '', '']);
-    setIsSending(false);
-    setIsVerifying(false);
-    setCountdown(0);
-    setAuthError('');
-  };
+  const { isAuthModalOpen, closeAuthModal, signInWithGoogle, authError } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => {
     closeAuthModal();
-    const win = window as any;
-    if (win.recaptchaVerifier) {
-      try {
-        win.recaptchaVerifier.clear();
-      } catch (e) {
-        console.error('Error clearing recaptcha verifier:', e);
-      }
-      win.recaptchaVerifier = null;
-    }
-    setTimeout(resetModal, 400);
   };
 
   const handleGoogleLogin = async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -63,55 +28,12 @@ export function AuthModal() {
       e.preventDefault();
       e.stopPropagation();
     }
-    await signInWithGoogle();
-    resetModal();
-  };
-
-  const handleSendOTP = async () => {
-    const cleaned = phone.replace(/\s/g, '');
-    const fullPhone = cleaned.startsWith('+') ? cleaned : `+91${cleaned}`;
-    if (!/^\+91[6-9]\d{9}$/.test(fullPhone)) {
-      setAuthError('Enter a valid 10-digit Indian mobile number.');
-      return;
-    }
-    setIsSending(true);
-    setAuthError('');
+    setIsLoading(true);
     try {
-      await sendOTP(fullPhone, 'recaptcha-container');
-      setStep('otp');
-      setCountdown(30);
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      await signInWithGoogle();
+      closeAuthModal();
     } finally {
-      setIsSending(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    const code = otp.join('');
-    if (code.length !== 6) { setAuthError('Enter all 6 digits.'); return; }
-    setIsVerifying(true);
-    setAuthError('');
-    try {
-      await verifyOTP(code);
-      resetModal();
-    } finally {
-      setIsVerifying(false);
+      setIsLoading(false);
     }
   };
 
@@ -154,160 +76,34 @@ export function AuthModal() {
                   <span className="text-brand-cream font-display font-bold text-lg tracking-wide">Frizly Crunch</span>
                 </div>
 
-                <h2 className="text-white font-display text-2xl font-bold mb-1">
-                  {step === 'choose' ? 'Welcome Back' : step === 'phone' ? 'Enter Mobile' : 'Verify OTP'}
-                </h2>
-                <p className="text-white/60 text-sm">
-                  {step === 'choose' ? 'Sign in to track orders & save your info'
-                    : step === 'phone' ? 'We\'ll send a 6-digit OTP to your number'
-                    : `OTP sent to +91 ${phone.slice(-10)}`}
-                </p>
+                <h2 className="text-white font-display text-2xl font-bold mb-1">Welcome Back</h2>
+                <p className="text-white/60 text-sm">Sign in to track orders &amp; save your info</p>
               </div>
 
-              {/* Invisible reCAPTCHA container */}
-              <div id="recaptcha-container" />
-
               {/* Body */}
-              <div className="px-4 sm:px-8 py-7">
-                <AnimatePresence mode="wait">
+              <div className="px-4 sm:px-8 py-8 flex flex-col gap-5">
 
-                  {/* ── Step: Choose ── */}
-                  {step === 'choose' && (
-                    <motion.div key="choose"
-                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="flex flex-col gap-4">
+                {authError && (
+                  <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 text-center">{authError}</p>
+                )}
 
-                      {/* Google Button */}
-                      <button 
-                        onClick={handleGoogleLogin}
-                        onTouchEnd={(e) => {
-                          e.preventDefault();
-                          handleGoogleLogin(e);
-                        }}
-                        style={{ cursor: 'pointer' }}
-                        className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 transition-all"
-                      >
-                        <GoogleIcon />
-                        Continue with Google
-                      </button>
+                {/* Google Button */}
+                <button
+                  id="google-signin-btn"
+                  onClick={handleGoogleLogin}
+                  onTouchEnd={(e) => { e.preventDefault(); handleGoogleLogin(e); }}
+                  disabled={isLoading}
+                  style={{ cursor: 'pointer' }}
+                  className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 disabled:opacity-60 transition-all"
+                >
+                  <GoogleIcon />
+                  {isLoading ? 'Signing in...' : 'Continue with Google'}
+                </button>
 
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-px bg-brand-cream-dk" />
-                        <span className="text-xs text-brand-text-lt font-medium">OR</span>
-                        <div className="flex-1 h-px bg-brand-cream-dk" />
-                      </div>
-
-                      {/* Phone Button */}
-                      <button onClick={() => setStep('phone')}
-                        className="w-full flex items-center justify-center gap-3 bg-brand-burgundy text-white rounded-2xl px-5 py-3.5 font-semibold hover:bg-brand-burgundy-lt transition-colors">
-                        <Phone className="w-5 h-5" />
-                        Continue with Mobile OTP
-                      </button>
-
-                      <p className="text-center text-[0.7rem] text-brand-text-lt leading-relaxed">
-                        By continuing, you agree to our Terms of Service.<br />
-                        Your data is safe with us. 🔒
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {/* ── Step: Phone ── */}
-                  {step === 'phone' && (
-                    <motion.div key="phone"
-                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="flex flex-col gap-5">
-                      <div>
-                        <label className="text-[0.78rem] font-bold tracking-[0.05em] uppercase text-brand-text-lt mb-2 block">
-                          Mobile Number
-                        </label>
-                        <div className="flex gap-2">
-                          <div className="flex items-center justify-center px-4 bg-brand-cream border-2 border-brand-cream-dk rounded-xl text-sm font-semibold text-brand-text">
-                            🇮🇳 +91
-                          </div>
-                          <input
-                            type="tel" inputMode="numeric"
-                            value={phone} onChange={e => { setPhone(e.target.value); setAuthError(''); }}
-                            onKeyDown={e => e.key === 'Enter' && handleSendOTP()}
-                            placeholder="98765 43210"
-                            maxLength={10}
-                            className="flex-1 p-3 border-2 border-brand-cream-dk rounded-xl focus:border-brand-burgundy outline-none text-brand-dark font-medium transition-colors"
-                          />
-                        </div>
-                      </div>
-
-                      {authError && (
-                        <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2">{authError}</p>
-                      )}
-
-                      <button onClick={handleSendOTP} disabled={isSending}
-                        className="w-full flex items-center justify-center gap-2 bg-brand-burgundy text-white rounded-2xl px-5 py-3.5 font-semibold hover:bg-brand-burgundy-lt disabled:opacity-60 transition-colors">
-                        {isSending ? 'Sending OTP...' : <>Send OTP <ArrowRight className="w-4 h-4" /></>}
-                      </button>
-
-                      <button onClick={() => { setStep('choose'); setAuthError(''); }}
-                        className="text-sm text-brand-text-lt hover:text-brand-burgundy transition-colors text-center">
-                        ← Back
-                      </button>
-                    </motion.div>
-                  )}
-
-                  {/* ── Step: OTP ── */}
-                  {step === 'otp' && (
-                    <motion.div key="otp"
-                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="flex flex-col gap-5">
-
-                      {/* 6-digit OTP boxes */}
-                      <div>
-                        <label className="text-[0.78rem] font-bold tracking-[0.05em] uppercase text-brand-text-lt mb-3 block text-center">
-                          Enter 6-digit OTP
-                        </label>
-                        <div className="flex gap-2 justify-center">
-                          {otp.map((digit, i) => (
-                            <input
-                              key={i}
-                              ref={el => { otpRefs.current[i] = el; }}
-                              type="text" inputMode="numeric"
-                              maxLength={1} value={digit}
-                              onChange={e => handleOtpChange(i, e.target.value)}
-                              onKeyDown={e => handleOtpKeyDown(i, e)}
-                              className={`flex-1 max-w-[44px] text-center text-xl font-bold border-2 rounded-xl outline-none transition-all ${
-                                digit ? 'border-brand-burgundy bg-brand-burgundy/5 text-brand-burgundy' : 'border-brand-cream-dk focus:border-brand-burgundy'
-                              }`}
-                              style={{ height: '52px' }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {authError && (
-                        <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 text-center">{authError}</p>
-                      )}
-
-                      <button onClick={handleVerifyOTP} disabled={isVerifying || otp.join('').length !== 6}
-                        className="w-full flex items-center justify-center gap-2 bg-brand-burgundy text-white rounded-2xl px-5 py-3.5 font-semibold hover:bg-brand-burgundy-lt disabled:opacity-60 transition-colors">
-                        {isVerifying ? 'Verifying...' : <><CheckCircle2 className="w-4 h-4" /> Verify & Login</>}
-                      </button>
-
-                      {/* Resend */}
-                      <div className="text-center text-sm text-brand-text-lt">
-                        {countdown > 0 ? (
-                          <span>Resend OTP in <strong className="text-brand-burgundy">{countdown}s</strong></span>
-                        ) : (
-                          <button onClick={() => { setOtp(['','','','','','']); handleSendOTP(); }}
-                            className="flex items-center gap-1 mx-auto text-brand-burgundy hover:underline font-medium">
-                            <RotateCcw className="w-3.5 h-3.5" /> Resend OTP
-                          </button>
-                        )}
-                      </div>
-
-                      <button onClick={() => { setStep('phone'); setOtp(['','','','','','']); setAuthError(''); }}
-                        className="text-sm text-brand-text-lt hover:text-brand-burgundy transition-colors text-center">
-                        ← Change Number
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <p className="text-center text-[0.7rem] text-brand-text-lt leading-relaxed">
+                  By continuing, you agree to our Terms of Service.<br />
+                  Your data is safe with us. 🔒
+                </p>
               </div>
             </div>
           </motion.div>

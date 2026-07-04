@@ -57,7 +57,6 @@ export function Footer() {
             <ul className="flex flex-col gap-2.5">
               <li><Link href="/privacy-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Privacy Policy</Link></li>
               <li><Link href="/terms-and-conditions" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Terms & Conditions</Link></li>
-              <li><Link href="/return-refund-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Return Policy</Link></li>
               <li><Link href="/shipping-delivery-policy" className="text-sm text-brand-cream/55 hover:text-brand-cream hover:pl-1 transition-all">Shipping Policy</Link></li>
             </ul>
           </div>

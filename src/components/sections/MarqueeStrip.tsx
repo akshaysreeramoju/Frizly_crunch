@@ -1,11 +1,10 @@
 import React from 'react';
 
 const MESSAGES = [
-  '🚚 Free shipping on orders above ₹499',
-  '✨ Easy Returns',
-  '🍈 Custard Apple', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
-  '🍐 Pink Guava', '🟠 Papaya', '🟤 Chikoo', '🟢 Amla', '🥕 Carrot',
-  '🌽 Sweetcorn', '🟣 Beetroot'
+  '🚚 Free delivery on orders above ₹899',
+  '🍏 Custard Apple', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
+  '🍐 Pink Guava', '🍈 Papaya', '🥥 Chikoo', '🍏 Amla', '🥕 Carrot',
+  '🌽 Sweetcorn', '🍠 Beetroot'
 ];
 
 export function MarqueeStrip() {
