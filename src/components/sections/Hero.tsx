@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { ChevronDown } from 'lucide-react';
 
 const HERO_IMAGES = [
-  '/images/products/apple/2.jpg',
+  '/images/products/apple/1.jpg',
   '/images/products/custard-apple/2.jpg',
   '/images/products/mango/2.jpg',
   '/images/products/pineapple/3.jpg',

@@ -89,8 +89,8 @@ export function Navbar() {
               priority
             />
             <div className="flex flex-col leading-tight min-w-0 truncate">
-              <span className="font-display font-bold text-sm sm:text-[1.35rem] tracking-[0.02em] text-brand-dark group-hover:text-brand-burgundy transition-colors truncate">
-                FRIZLY Crunch
+              <span className="font-display font-bold text-sm sm:text-[1.35rem] tracking-[0.02em] group-hover:opacity-90 transition-opacity truncate">
+                <span style={{color: '#2d7a2d'}}>frizly</span> <span style={{color: '#7B4A1E'}}>CRUNCH</span>
               </span>
               <span className="font-body text-[0.55rem] sm:text-[0.6rem] font-bold tracking-[0.25em] text-brand-text-lt/80 uppercase mt-0.5 truncate">
                 Real Food. Reinvented.

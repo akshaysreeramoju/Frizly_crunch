@@ -73,7 +73,9 @@ export function AuthModal() {
                     height={28}
                     className="w-8 h-7 object-contain shrink-0"
                   />
-                  <span className="text-brand-cream font-display font-bold text-lg tracking-wide">Frizly Crunch</span>
+                  <span className="font-display font-bold text-lg tracking-wide">
+                    <span style={{color: '#5cb85c'}}>frizly</span> <span style={{color: '#d4a96a'}}>CRUNCH</span>
+                  </span>
                 </div>
 
                 <h2 className="text-white font-display text-2xl font-bold mb-1">Welcome Back</h2>
