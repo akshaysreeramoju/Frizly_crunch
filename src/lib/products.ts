@@ -1,11 +1,22 @@
 import { Product } from './types';
 
 export const PRODUCTS: Record<string, Product> = {
+  'trial-pack': {
+    id: 'trial-pack',
+    name: 'Trail Mix (Trial Pack)',
+    category: 'fruit',
+    emoji: '🎁',
+    img: '/images/products/trial-pack.jpg',
+    desc: 'Can\'t decide? Try our variety trail mix to taste the best of our freeze-dried fruits. A perfect combination of 100% real fruit in one convenient pouch.',
+    benefits: ['Variety of Flavours', 'Great for Tasting', '100% Natural', 'Light & Crunchy'],
+    weight: '130g',
+    price: 659
+  },
   'custard-apple': {
     id: 'custard-apple',
     name: 'Custard Apple',
     category: 'fruit',
-    emoji: '🍏',
+    emoji: '🍈',
     img: '/images/products/custard-apple.jpg',
     desc: 'Our freeze-dried custard apple captures the essence of sun-ripened fruit at its peak. Each piece delivers a concentrated burst of sweet, creamy flavour with an incredible crispy crunch. Perfect as a standalone snack or a flavourful addition to your morning cereal.',
     benefits: ['Rich in Vitamin C', 'No Added Sugar', 'No Preservatives', 'No Artificial Colours'],
@@ -38,7 +49,7 @@ export const PRODUCTS: Record<string, Product> = {
     id: 'guava',
     name: 'Pink Guava',
     category: 'fruit',
-    emoji: '🫐',
+    emoji: '🍐',
     img: '/images/products/guava.jpg',
     desc: 'A tropical gem that is often overlooked — our pink guava is freeze-dried to perfection. With its distinctive sweet-tart flavour and beautiful pink hue, it\'s one of our most loved varieties. Packed with Vitamin C and dietary fibre.',
     benefits: ['Rich in Vitamin C', 'Good Source of Fibre', 'Supports Immunity', 'Antioxidants'],
@@ -147,3 +158,4 @@ export const PRODUCTS: Record<string, Product> = {
 };
 
 export const PRODUCT_LIST = Object.values(PRODUCTS);
+

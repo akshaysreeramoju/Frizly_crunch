@@ -46,6 +46,15 @@ export function AuthModal() {
 
   const handleClose = () => {
     closeAuthModal();
+    const win = window as any;
+    if (win.recaptchaVerifier) {
+      try {
+        win.recaptchaVerifier.clear();
+      } catch (e) {
+        console.error('Error clearing recaptcha verifier:', e);
+      }
+      win.recaptchaVerifier = null;
+    }
     setTimeout(resetModal, 400);
   };
 

@@ -131,54 +131,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
         </div>
       </div>
 
-      {/* Nutrition Facts Table */}
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 mb-20">
-        <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-sm border border-brand-cream-dk flex flex-col md:flex-row gap-12">
-          <div className="md:w-1/3">
-            <h3 className="font-display text-2xl font-bold text-brand-dark mb-4">Nutritional Facts</h3>
-            <p className="text-brand-text-lt mb-6">100% natural {product.name}. Values per 100g of freeze-dried product.</p>
-            <div className="flex items-center gap-2 text-brand-sage font-bold bg-brand-sage/10 px-4 py-3 rounded-xl border border-brand-sage/20 w-max">
-              <Heart className="w-5 h-5 fill-brand-sage" />
-              100% Natural Ingredients
-            </div>
-          </div>
-          <div className="md:w-2/3 border-2 border-brand-dark rounded-xl overflow-hidden bg-white">
-            <div className="bg-brand-dark text-white font-bold p-3 text-lg border-b-4 border-brand-dark">Nutrition Facts</div>
-            <div className="p-4 flex flex-col gap-2 font-medium text-brand-dark">
-              <div className="flex justify-between border-b border-gray-200 pb-2"><span>Calories</span> <span>340 kcal</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2"><span>Total Carbohydrates</span> <span>85g</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2 pl-4 text-brand-text-lt"><span>Dietary Fiber</span> <span>12g</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2 pl-4 text-brand-text-lt"><span>Total Sugars (Natural)</span> <span>65g</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2 pl-4 font-bold text-brand-burgundy"><span>Added Sugars</span> <span>0g</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2"><span>Protein</span> <span>4g</span></div>
-              <div className="flex justify-between pb-1"><span>Total Fat</span> <span>0.5g</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Reviews Section Mock */}
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 mb-20">
-        <h3 className="font-display text-3xl font-bold text-brand-dark mb-8 text-center">What Customers Are Saying</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { n: "Priya S.", loc: "Mumbai", r: "Absolutely love the crunch! Best healthy snack I've had." },
-            { n: "Rahul K.", loc: "Delhi", r: "Perfect for my kids' lunchboxes. No added sugar is a huge plus." },
-            { n: "Anita M.", loc: "Bangalore", r: "Tastes exactly like the real fruit but with an amazing texture." }
-          ].map((rev, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-brand-cream-dk">
-              <div className="flex text-brand-gold mb-3">
-                <Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" />
-              </div>
-              <p className="text-brand-text font-medium italic mb-4">"{rev.r}"</p>
-              <div className="flex items-center justify-between mt-auto border-t border-brand-cream-dk pt-4">
-                <span className="font-bold text-sm text-brand-dark">{rev.n}</span>
-                <span className="text-xs text-brand-text-lt">{rev.loc}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* You May Also Like */}
       <motion.div

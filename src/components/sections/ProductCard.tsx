@@ -52,7 +52,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
         {/* Overlay */}
         <div className="absolute inset-0 bg-brand-dark/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
-            onClick={(e) => { e.preventDefault(); onQuickView(product); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(product); }}
             className="font-body text-sm font-semibold text-brand-dark bg-brand-gold px-5 py-2.5 rounded-full translate-y-3 group-hover:translate-y-0 hover:bg-white hover:-translate-y-0.5 transition-all duration-300 tracking-wide"
           >
             Quick View

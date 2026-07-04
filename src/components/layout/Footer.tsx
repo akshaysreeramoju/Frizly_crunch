@@ -85,7 +85,7 @@ export function Footer() {
 
       <div className="max-w-[1280px] mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
         <p className="text-xs text-brand-cream/35 tracking-wide">
-          © {SITE_CONFIG.legal.copyrightYear} {SITE_CONFIG.legal.companyName} · {SITE_CONFIG.address.full}
+          © {SITE_CONFIG.legal.copyrightYear} {SITE_CONFIG.legal.companyName}
         </p>
         <p className="text-xs text-brand-cream/35 tracking-wide">
           100% Natural · Freeze-Dried · Non-Fried · Non-Baked · No Preservatives

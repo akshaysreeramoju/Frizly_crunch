@@ -15,12 +15,16 @@ export function GiftBanner() {
           Give the gift of pure, natural health. Our premium freeze-dried fruit and vegetable boxes are beautifully packaged and guarantee a smile.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Button size="lg" className="bg-brand-gold text-brand-dark hover:bg-brand-gold-lt">
-            Build a Gift Box
-          </Button>
-          <Button size="lg" variant="outline" className="border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white">
-            Contact for Bulk Orders <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+          <a href="/#products" className="inline-block">
+            <Button size="lg" className="bg-brand-gold text-brand-dark hover:bg-brand-gold-lt w-full">
+              Build a Gift Box
+            </Button>
+          </a>
+          <a href="/contact" className="inline-block">
+            <Button size="lg" variant="outline" className="border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white w-full">
+              Contact for Bulk Orders <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </a>
         </div>
       </div>
     </section>

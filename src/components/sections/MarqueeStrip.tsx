@@ -1,13 +1,15 @@
 import React from 'react';
 
-const FLAVOURS = [
-  '🍏 Custard Apple', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
-  '🫐 Pink Guava', '🟠 Papaya', '🟤 Chikoo', '🟢 Amla', '🥕 Carrot',
+const MESSAGES = [
+  '🚚 Free shipping on orders above ₹499',
+  '✨ Easy Returns',
+  '🍈 Custard Apple', '🥭 Mango', '🍍 Pineapple', '🍌 Banana', '🍎 Apple',
+  '🍐 Pink Guava', '🟠 Papaya', '🟤 Chikoo', '🟢 Amla', '🥕 Carrot',
   '🌽 Sweetcorn', '🟣 Beetroot'
 ];
 
 export function MarqueeStrip() {
-  const items = [...FLAVOURS, ...FLAVOURS];
+  const items = [...MESSAGES, ...MESSAGES];
 
   return (
     <div className="relative bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt py-3.5 overflow-hidden">

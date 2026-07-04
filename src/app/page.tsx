@@ -6,7 +6,7 @@ import { Products } from "@/components/sections/Products";
 
 import { Process } from "@/components/sections/Process";
 import { Uses } from "@/components/sections/Uses";
-
+import { HydrationTip } from "@/components/sections/HydrationTip";
 import { GiftBanner } from "@/components/sections/GiftBanner";
 import { NewsletterStrip } from "@/components/sections/NewsletterStrip";
 
@@ -21,7 +21,7 @@ export default function Home() {
 
       <Process />
       <Uses />
-
+      <HydrationTip />
       <GiftBanner />
       <NewsletterStrip />
     </div>

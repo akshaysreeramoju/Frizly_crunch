@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { usePathname } from 'next/navigation';
 
 export function BottomNav() {
-  const { totalItems, dispatch } = useCart();
+  const { state, totalItems, dispatch } = useCart();
   const { user, openAuthModal } = useAuth();
   const pathname = usePathname();
 
@@ -16,7 +16,7 @@ export function BottomNav() {
       <div className="flex justify-around items-center h-16">
         <Link 
           href="/" 
-          className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname === '/' ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
+          className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname === '/' && !state.isCartOpen ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
         >
           <Home className="w-5 h-5 mb-1" />
           <span className="text-[0.65rem] font-bold">Home</span>
@@ -24,7 +24,7 @@ export function BottomNav() {
         
         <Link 
           href="/products" 
-          className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname === '/products' ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
+          className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname === '/products' && !state.isCartOpen ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
         >
           <ShoppingBag className="w-5 h-5 mb-1" />
           <span className="text-[0.65rem] font-bold">Shop</span>
@@ -32,7 +32,7 @@ export function BottomNav() {
 
         <button 
           onClick={() => dispatch({ type: 'OPEN_CART' })}
-          className="flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] text-brand-text-lt relative"
+          className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${state.isCartOpen ? 'text-brand-burgundy' : 'text-brand-text-lt'} relative`}
         >
           <div className="relative">
             <ShoppingCart className="w-5 h-5 mb-1" />
@@ -47,8 +47,8 @@ export function BottomNav() {
 
         {user ? (
           <Link 
-            href="/account" 
-            className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname?.startsWith('/account') ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
+            href="/profile" 
+            className={`flex flex-col items-center justify-center w-full h-full min-w-[44px] min-h-[44px] ${pathname?.startsWith('/profile') && !state.isCartOpen ? 'text-brand-burgundy' : 'text-brand-text-lt'}`}
           >
             <User className="w-5 h-5 mb-1" />
             <span className="text-[0.65rem] font-bold">Profile</span>
