@@ -9,7 +9,8 @@ export const PRODUCTS: Record<string, Product> = {
     img: '/images/products/trial-pack/1.jpg',
     images: [
       '/images/products/trial-pack/1.jpg',
-      '/images/products/trial-pack/2.jpg',
+      '/images/products/trial-pack/2.png',
+      '/images/products/trial-pack/3.png',
     ],
     desc: 'Can\'t decide? Try our variety trail mix to taste the best of our freeze-dried fruits. A perfect combination of 100% real fruit in one convenient pouch.',
     benefits: ['Variety of Flavours', 'Great for Tasting', '100% Natural', 'Light & Crunchy'],
