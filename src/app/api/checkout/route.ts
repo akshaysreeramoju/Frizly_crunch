@@ -54,8 +54,8 @@ export async function POST(req: Request) {
     orders.push(order);
     await fs.writeFile(ordersFile, JSON.stringify(orders, null, 2));
 
-    // Send email notifications (non-blocking)
-    Promise.allSettled([
+    // Send email notifications
+    await Promise.allSettled([
       sendAdminOrderNotification(order),
       sendCustomerOrderConfirmation(order),
     ]).catch((e) => console.error('Notification error:', e));

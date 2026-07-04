@@ -99,27 +99,12 @@ export function ProductDetailClient({ slug }: { slug: string }) {
           <div className="w-full lg:w-1/2 flex flex-col">
             <div className="mb-6 border-b border-brand-cream-dk pb-6">
               <div className="text-xs font-bold tracking-[0.1em] uppercase text-brand-sage mb-2">
-                {product.category === 'fruit' ? '🍓 Freeze-Dried Fruit' : '🥕 Freeze-Dried Vegetable'}
+                {product.category === 'fruit' ? 'Freeze-Dried Fruit' : 'Freeze-Dried Vegetable'}
               </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold text-brand-dark mb-4 leading-tight flex items-center flex-wrap gap-3">
-                {product.name} 
-                <span className="inline-flex items-center justify-center w-[1.2em] h-[1.2em] rounded-full bg-brand-cream border-2 border-brand-cream-dk text-[0.7em] shadow-sm flex-shrink-0">
-                  {product.emoji}
-                </span>
+              <h1 className="font-display text-4xl sm:text-5xl font-bold text-brand-dark mb-4 leading-tight">
+                {product.name}
               </h1>
               
-              {/* Reviews */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center text-brand-gold">
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                </div>
-                <span className="text-sm font-semibold text-brand-dark">4.8</span>
-                <span className="text-sm text-brand-text-lt underline cursor-pointer">(124 Reviews)</span>
-              </div>
             </div>
 
             <div className="mb-8">
@@ -135,13 +120,16 @@ export function ProductDetailClient({ slug }: { slug: string }) {
             </p>
 
             {/* Benefits */}
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {product.benefits.map((b) => (
-                <div key={b} className="flex items-center gap-2 text-sm font-semibold text-brand-sage bg-brand-sage/5 p-3 rounded-xl border border-brand-sage/10">
-                  <CheckIcon />
-                  {b}
-                </div>
-              ))}
+            <div className="mb-8">
+              <h3 className="font-display text-lg font-bold text-brand-dark mb-4 uppercase tracking-wide">Health Benefits</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {product.benefits.map((b) => (
+                  <div key={b} className="flex items-center gap-2 text-sm font-semibold text-brand-sage bg-brand-sage/5 p-3 rounded-xl border border-brand-sage/10">
+                    <CheckIcon />
+                    {b}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Sticky Add to Cart (Mobile) / Normal (Desktop) */}

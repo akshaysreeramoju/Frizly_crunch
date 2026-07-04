@@ -313,3 +313,49 @@ export async function sendShippingUpdateEmail(order: {
     html,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Contact form notification
+// ---------------------------------------------------------------------------
+export async function sendContactFormNotification(data: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  if (!process.env.SMTP_USER && !process.env.RESEND_API_KEY) return;
+
+  const transporter = createTransporter();
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:sans-serif;background:#f9f5ef;margin:0;padding:20px;">
+  <div style="max-width:560px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(107,30,30,0.08);">
+    <div style="background:#6B1E1E;padding:24px 32px;text-align:center;">
+      <h1 style="color:#D4AF37;margin:0 0 4px;font-size:22px;">New Contact Message 📬</h1>
+    </div>
+    <div style="padding:28px 32px;">
+      <p style="color:#3d2c1e;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        <strong>From:</strong> ${data.name} (${data.email})<br>
+        <strong>Subject:</strong> ${data.subject}
+      </p>
+      <div style="background:#fdf9f4;padding:16px;border-radius:10px;font-size:14px;color:#3d2c1e;line-height:1.6;white-space:pre-wrap;">${data.message}</div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  await transporter.sendMail({
+    from: FROM_ADDRESS,
+    to: adminEmail,
+    replyTo: data.email,
+    subject: `New Message from ${data.name}: ${data.subject}`,
+    html,
+  });
+  console.log('[Mailer] Contact form notification sent to admin');
+}

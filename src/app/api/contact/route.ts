@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
+import { sendContactFormNotification } from '@/lib/mailer';
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
     await fs.writeFile(submissionsFile, JSON.stringify(submissions, null, 2));
 
     console.log('New contact form submission:', data);
+
+    // Send email notification
+    await sendContactFormNotification(data).catch(e => console.error('Contact mailer error:', e));
 
     return NextResponse.json({ success: true, message: 'Message sent successfully!' });
   } catch (error) {

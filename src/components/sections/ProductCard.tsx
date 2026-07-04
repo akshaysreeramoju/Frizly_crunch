@@ -63,7 +63,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
       {/* Info */}
       <div className="p-5 flex flex-col flex-1">
         <div className="text-[0.7rem] font-semibold text-brand-sage tracking-[0.08em] uppercase mb-1.5">
-          {product.category === 'fruit' ? '🍓 Fruit' : '🥕 Vegetable'}
+          {product.category === 'fruit' ? 'Fruit' : 'Vegetable'}
         </div>
         <Link href={`/products/${product.id}`} className="hover:text-brand-burgundy transition-colors">
           <h3 className="font-display text-xl font-bold text-brand-dark mb-1">
@@ -71,13 +71,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
           </h3>
         </Link>
         
-        {/* Mock Star Rating */}
-        <div className="flex items-center gap-1 mb-2">
-          <div className="flex text-brand-gold text-[10px]">
-            ★ ★ ★ ★ ★
-          </div>
-          <span className="text-[0.65rem] text-brand-text-lt">(4.8)</span>
-        </div>
+
 
         <p className="text-[0.78rem] text-brand-text-lt leading-[1.5] mb-3 line-clamp-2">
           {product.desc}
