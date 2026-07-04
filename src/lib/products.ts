@@ -118,11 +118,11 @@ export const PRODUCTS: Record<string, Product> = {
     name: 'Apple',
     category: 'fruit',
     emoji: '🍎',
-    img: '/images/products/apple/3.jpg',
+    img: '/images/products/apple/1.jpg',
     images: [
-      '/images/products/apple/3.jpg',
       '/images/products/apple/1.jpg',
       '/images/products/apple/2.jpg',
+      '/images/products/apple/3.jpg',
     ],
     desc: 'An apple a day, the crunchy freeze-dried way! Our premium apple slices are sourced from the best orchards and freeze-dried to preserve their natural crisp flavour. Light, refreshing, and entirely guilt-free.',
     benefits: ['Rich in Fiber', 'Supports Heart Health', 'Helps Weight Management'],
