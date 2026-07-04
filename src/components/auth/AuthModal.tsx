@@ -74,7 +74,7 @@ export function AuthModal() {
                     className="w-8 h-7 object-contain shrink-0"
                   />
                   <span className="font-display font-bold text-lg tracking-wide">
-                    <span style={{color: '#5cb85c'}}>frizly</span> <span style={{color: '#d4a96a'}}>CRUNCH</span>
+                    <span style={{color: '#5cb85c'}}>FRIZLY</span> <span style={{color: '#d4a96a'}}>CRUNCH</span>
                   </span>
                 </div>
 

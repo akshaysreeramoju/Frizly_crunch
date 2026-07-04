@@ -19,7 +19,7 @@ export function Footer() {
             />
             <div className="flex flex-col">
               <span className="font-display font-bold text-[1.1rem] tracking-wide">
-                <span style={{color: '#5cb85c'}}>frizly</span> <span style={{color: '#d4a96a'}}>CRUNCH</span>
+                <span style={{color: '#5cb85c'}}>FRIZLY</span> <span style={{color: '#d4a96a'}}>CRUNCH</span>
               </span>
               <span className="text-[0.6rem] font-medium tracking-[0.15em] text-brand-gold">— REAL FOOD. REINVENTED. —</span>
             </div>
