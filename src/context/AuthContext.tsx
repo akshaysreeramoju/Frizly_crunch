@@ -100,15 +100,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthError('');
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-      
+      provider.setCustomParameters({ prompt: 'select_account' });
+
+      // Use redirect on mobile (popups are blocked by mobile browsers)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return; // Page will reload after redirect
+      }
+
+      // Use popup on desktop, fall back to redirect if blocked
       try {
         await signInWithPopup(auth, provider);
         closeAuthModal();
       } catch (popupErr: any) {
-        if (popupErr?.code === 'auth/popup-blocked') {
+        if (popupErr?.code === 'auth/popup-blocked' || popupErr?.code === 'auth/popup-closed-by-user') {
           await signInWithRedirect(auth, provider);
         } else {
           throw popupErr;

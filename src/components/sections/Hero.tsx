@@ -8,19 +8,21 @@ import { Button } from '@/components/ui/Button';
 import { ChevronDown } from 'lucide-react';
 
 const HERO_IMAGES = [
-  '/images/products/custard-apple.jpg',
-  '/images/products/mango.jpg',
-  '/images/products/pineapple.jpg',
-  '/images/products/guava.jpg',
-  '/images/products/carrot.jpg',
+  '/images/products/apple/3.jpg',
+  '/images/products/custard-apple/2.jpg',
+  '/images/products/mango/2.jpg',
+  '/images/products/pineapple/3.jpg',
+  '/images/products/guava/1.jpg',
+  '/images/products/carrot/2.jpg',
 ];
 
 const BADGES = [
-  ['🍏 Custard Apple', '🥭 Mango', '🍍 Pineapple'],
-  ['🥭 Mango', '🍌 Banana', '🎯 Natural'],
-  ['🍍 Pineapple', '💚 Healthy', '✨ Pure'],
-  ['🫐 Pink Guava', '🌿 Natural', '🔥 Tasty'],
-  ['🥕 Carrot', '❄️ Freeze-Dried', '💛 Crispy'],
+  ['Apple', 'Rich in Fiber', 'Natural'],
+  ['Custard Apple', 'Mango', 'Pineapple'],
+  ['Mango', 'Banana', 'Natural'],
+  ['Pineapple', 'Healthy', 'Pure'],
+  ['Pink Guava', 'Natural', 'Tasty'],
+  ['Carrot', 'Freeze-Dried', 'Crispy'],
 ];
 
 export function Hero() {
