@@ -107,7 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure auth state persists in localStorage (survives page reloads)
       await setPersistence(auth, browserLocalPersistence);
 
-      // Try popup first — no page reload, auth state is immediately available.
+      // On mobile, popups are blocked or fail silently in Safari and in-app browsers.
+      // Detect mobile and go straight to redirect for reliable auth.
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(
+        typeof navigator !== 'undefined' ? navigator.userAgent : ''
+      );
+
+      if (isMobile) {
+        // Redirect flow: page reloads, getRedirectResult() in the useEffect picks up the result.
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+
+      // Desktop: try popup first — no page reload, auth state is immediately available.
       // Fall back to redirect only if the popup is explicitly blocked.
       try {
         await signInWithPopup(auth, provider);
@@ -115,17 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // that watches the user state from onAuthStateChanged.
       } catch (popupErr: unknown) {
         const err = popupErr as { code?: string };
-        if (
-          err.code === 'auth/popup-blocked' ||
-          err.code === 'auth/popup-closed-by-user'
-        ) {
-          if (err.code === 'auth/popup-closed-by-user') {
-            // User dismissed the popup — not an error, just do nothing
-            return;
-          }
+        if (err.code === 'auth/popup-blocked') {
           // Popup was blocked by the browser — fall back to redirect
           console.warn('[Auth] Popup blocked, falling back to redirect...');
           await signInWithRedirect(auth, provider);
+        } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+          // User dismissed the popup — not an error, just do nothing
+          return;
         } else {
           throw popupErr;
         }
@@ -133,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       console.error('Google sign-in error:', err);
       const e = err as { code?: string };
-      if (e.code !== 'auth/popup-closed-by-user') {
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
         setAuthError('Google sign-in failed. Please try again.');
       }
     }

@@ -139,7 +139,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
               </Button>
               <div className="hidden lg:flex items-center justify-center gap-4 mt-4 text-[0.65rem] font-bold tracking-wide text-brand-text-lt uppercase">
                 <div className="flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Secure Payment</div>
-                <div className="flex items-center gap-1"><Truck className="w-4 h-4" /> Free Delivery above ₹999</div>
+                <div className="flex items-center gap-1"><Truck className="w-4 h-4" /> Free Delivery above ₹899</div>
               </div>
             </div>
           </div>

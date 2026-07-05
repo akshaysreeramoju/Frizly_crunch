@@ -15,7 +15,7 @@ export function TrustBadges() {
           </div>
           <div className="flex items-center justify-center gap-3 text-brand-dark">
             <Truck className="w-6 h-6 text-brand-sage" />
-            <span className="font-semibold text-sm">Free Delivery above ₹999</span>
+            <span className="font-semibold text-sm">Free Delivery above ₹899</span>
           </div>
         </div>
       </div>

@@ -37,16 +37,23 @@ export function AuthModal() {
       e.stopPropagation();
     }
     setIsLoading(true);
+    // Show redirecting UI on mobile (page will navigate away)
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(
+      typeof navigator !== 'undefined' ? navigator.userAgent : ''
+    );
+    if (isMobile) {
+      setIsRedirecting(true);
+    }
     try {
       await signInWithGoogle();
-      // For popup: signInWithGoogle resolves after the user picks an account.
+      // For popup (desktop): signInWithGoogle resolves after the user picks an account.
       // The useEffect above watching `user` will auto-close the modal once
       // onAuthStateChanged fires. No need to closeAuthModal() explicitly.
     } catch {
       // Error is handled inside signInWithGoogle (sets authError)
+      setIsRedirecting(false);
     } finally {
       setIsLoading(false);
-      setIsRedirecting(false);
     }
   };
 

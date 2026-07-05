@@ -1,7 +1,7 @@
 import React from 'react';
 
 const MESSAGES = [
-  'Free delivery on orders above ₹999',
+  'Free delivery on orders above ₹899',
   'Custard Apple', 'Mango', 'Pineapple', 'Banana', 'Apple',
   'Pink Guava', 'Papaya', 'Chikoo', 'Amla', 'Carrot',
   'Sweetcorn', 'Beetroot'

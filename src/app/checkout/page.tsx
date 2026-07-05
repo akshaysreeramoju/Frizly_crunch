@@ -73,7 +73,7 @@ export default function CheckoutPage() {
   const effectiveDiscountPercent = appliedCoupon ? couponDiscountPercent : discountPercent;
   const effectiveDiscountAmount = Math.round((cartTotal * effectiveDiscountPercent) / 100);
   const subTotalAfterDiscount = cartTotal - effectiveDiscountAmount;
-  const shippingCost = subTotalAfterDiscount < 999 && subTotalAfterDiscount > 0 ? 99 : 0;
+  const shippingCost = subTotalAfterDiscount < 899 && subTotalAfterDiscount > 0 ? 99 : 0;
   const finalTotal = subTotalAfterDiscount + shippingCost;
 
   const handleApplyCoupon = async () => {
@@ -360,7 +360,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm text-brand-text-lt">
-                  <span>Shipping {subTotalAfterDiscount < 999 && <span className="text-[0.65rem] text-brand-text-lt">(Free above ₹999)</span>}</span>
+                  <span>Shipping {subTotalAfterDiscount < 899 && <span className="text-[0.65rem] text-brand-text-lt">(Free above ₹899)</span>}</span>
                   <span className={shippingCost === 0 ? "text-green-600 font-semibold" : "text-brand-dark"}>
                     {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
                   </span>
