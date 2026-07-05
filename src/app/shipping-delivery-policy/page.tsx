@@ -25,8 +25,8 @@ export default function ShippingDeliveryPolicyPage() {
             Shipping charges for your order will be calculated and displayed at checkout.
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li><strong>Orders above ₹499:</strong> Free Standard Shipping (3-5 business days)</li>
-            <li><strong>Orders below ₹499:</strong> Flat rate of ₹50 for Standard Shipping (3-5 business days)</li>
+            <li><strong>Orders above ₹999:</strong> Free Standard Shipping (3-5 business days)</li>
+            <li><strong>Orders below ₹999:</strong> Flat rate of ₹99 for Standard Shipping (3-5 business days)</li>
           </ul>
           <p className="mb-4">
             Delivery delays can occasionally occur due to unforeseen circumstances or carrier issues.
