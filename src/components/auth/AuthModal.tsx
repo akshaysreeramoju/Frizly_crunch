@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -16,11 +16,19 @@ const GoogleIcon = () => (
 );
 
 export function AuthModal() {
-  const { isAuthModalOpen, closeAuthModal, signInWithGoogle, authError } = useAuth();
+  const { isAuthModalOpen, closeAuthModal, signInWithGoogle, authError, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Auto-close modal if user becomes logged in (e.g. after redirect returns)
+  useEffect(() => {
+    if (user && isAuthModalOpen) {
+      closeAuthModal();
+    }
+  }, [user, isAuthModalOpen, closeAuthModal]);
 
   const handleClose = () => {
-    closeAuthModal();
+    if (!isRedirecting) closeAuthModal();
   };
 
   const handleGoogleLogin = async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -29,11 +37,18 @@ export function AuthModal() {
       e.stopPropagation();
     }
     setIsLoading(true);
+    setIsRedirecting(true);
     try {
+      // signInWithRedirect navigates AWAY from the page.
+      // Do NOT call closeAuthModal() here — the page will reload and
+      // onAuthStateChanged will pick up the user after returning.
       await signInWithGoogle();
+      // If we reach here it means signInWithPopup was used (fallback).
+      // In that case close the modal normally.
       closeAuthModal();
-    } finally {
+    } catch {
       setIsLoading(false);
+      setIsRedirecting(false);
     }
   };
 
@@ -90,17 +105,25 @@ export function AuthModal() {
                 )}
 
                 {/* Google Button */}
-                <button
-                  id="google-signin-btn"
-                  onClick={handleGoogleLogin}
-                  onTouchEnd={(e) => { e.preventDefault(); handleGoogleLogin(e); }}
-                  disabled={isLoading}
-                  style={{ cursor: 'pointer' }}
-                  className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 disabled:opacity-60 transition-all"
-                >
-                  <GoogleIcon />
-                  {isLoading ? 'Signing in...' : 'Continue with Google'}
-                </button>
+                {isRedirecting ? (
+                  <div className="w-full flex flex-col items-center justify-center gap-3 border-2 border-brand-burgundy/30 bg-brand-cream/50 rounded-2xl px-5 py-4 text-center">
+                    <div className="w-5 h-5 border-2 border-brand-burgundy border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm font-semibold text-brand-dark">Redirecting to Google…</p>
+                    <p className="text-xs text-brand-text-lt">You will be brought back automatically after sign-in.</p>
+                  </div>
+                ) : (
+                  <button
+                    id="google-signin-btn"
+                    onClick={handleGoogleLogin}
+                    onTouchEnd={(e) => { e.preventDefault(); handleGoogleLogin(e); }}
+                    disabled={isLoading}
+                    style={{ cursor: 'pointer' }}
+                    className="w-full flex items-center justify-center gap-3 border-2 border-brand-cream-dk rounded-2xl px-5 py-3.5 font-semibold text-brand-dark hover:border-brand-burgundy/40 hover:bg-brand-cream/50 disabled:opacity-60 transition-all"
+                  >
+                    <GoogleIcon />
+                    {isLoading ? 'Signing in...' : 'Continue with Google'}
+                  </button>
+                )}
 
                 <p className="text-center text-[0.7rem] text-brand-text-lt leading-relaxed">
                   By continuing, you agree to our Terms of Service.<br />
