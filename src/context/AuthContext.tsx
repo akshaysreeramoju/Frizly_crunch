@@ -13,6 +13,8 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult,
   updateProfile,
+  browserLocalPersistence,
+  setPersistence,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -101,13 +103,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      
-      // Always use redirect. Popups are frequently blocked by Brave, Safari ITP, and mobile browsers.
-      await signInWithRedirect(auth, provider);
-      
+
+      // Ensure auth state persists in localStorage (survives page reloads)
+      await setPersistence(auth, browserLocalPersistence);
+
+      // Try popup first — no page reload, auth state is immediately available.
+      // Fall back to redirect only if the popup is explicitly blocked.
+      try {
+        await signInWithPopup(auth, provider);
+        // Popup succeeded — modal will close via the useEffect in AuthModal
+        // that watches the user state from onAuthStateChanged.
+      } catch (popupErr: unknown) {
+        const err = popupErr as { code?: string };
+        if (
+          err.code === 'auth/popup-blocked' ||
+          err.code === 'auth/popup-closed-by-user'
+        ) {
+          if (err.code === 'auth/popup-closed-by-user') {
+            // User dismissed the popup — not an error, just do nothing
+            return;
+          }
+          // Popup was blocked by the browser — fall back to redirect
+          console.warn('[Auth] Popup blocked, falling back to redirect...');
+          await signInWithRedirect(auth, provider);
+        } else {
+          throw popupErr;
+        }
+      }
     } catch (err: unknown) {
       console.error('Google sign-in error:', err);
-      setAuthError('Google sign-in failed. Please try again.');
+      const e = err as { code?: string };
+      if (e.code !== 'auth/popup-closed-by-user') {
+        setAuthError('Google sign-in failed. Please try again.');
+      }
     }
   };
 

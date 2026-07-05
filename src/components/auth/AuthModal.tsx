@@ -37,16 +37,14 @@ export function AuthModal() {
       e.stopPropagation();
     }
     setIsLoading(true);
-    setIsRedirecting(true);
     try {
-      // signInWithRedirect navigates AWAY from the page.
-      // Do NOT call closeAuthModal() here — the page will reload and
-      // onAuthStateChanged will pick up the user after returning.
       await signInWithGoogle();
-      // If we reach here it means signInWithPopup was used (fallback).
-      // In that case close the modal normally.
-      closeAuthModal();
+      // For popup: signInWithGoogle resolves after the user picks an account.
+      // The useEffect above watching `user` will auto-close the modal once
+      // onAuthStateChanged fires. No need to closeAuthModal() explicitly.
     } catch {
+      // Error is handled inside signInWithGoogle (sets authError)
+    } finally {
       setIsLoading(false);
       setIsRedirecting(false);
     }
