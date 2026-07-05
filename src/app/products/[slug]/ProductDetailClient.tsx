@@ -133,7 +133,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
             </div>
 
             {/* Sticky Add to Cart (Mobile) / Normal (Desktop) */}
-            <div className="mt-auto fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-brand-cream-dk z-40 lg:relative lg:p-0 lg:bg-transparent lg:border-none lg:z-auto">
+            <div className="mt-auto fixed bottom-16 md:bottom-0 left-0 right-0 p-4 bg-white border-t border-brand-cream-dk z-40 lg:relative lg:bottom-auto lg:p-0 lg:bg-transparent lg:border-none lg:z-auto">
               <Button size="lg" fullWidth onClick={handleAdd} className="h-14 text-lg">
                 Add to Cart — ₹{product.price}
               </Button>
