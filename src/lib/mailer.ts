@@ -359,3 +359,55 @@ export async function sendContactFormNotification(data: {
   });
   console.log('[Mailer] Contact form notification sent to admin');
 }
+
+// ---------------------------------------------------------------------------
+// Customer WhatsApp order confirmation (Meta Cloud API)
+// ---------------------------------------------------------------------------
+export async function sendCustomerWhatsAppConfirmation(order: {
+  id: string;
+  shippingAddress: { fullName: string; phone: string };
+  total: number;
+}) {
+  const phone = order.shippingAddress.phone;
+  if (!phone) return;
+
+  const token = process.env.WHATSAPP_API_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!token || !phoneNumberId) {
+    console.warn('[Mailer] WhatsApp API credentials missing (WHATSAPP_API_TOKEN, WHATSAPP_PHONE_NUMBER_ID). Skipping WhatsApp message.');
+    return;
+  }
+
+  // Clean phone number: remove non-numeric chars, ensure it has country code (defaulting to 91 for India)
+  const cleanPhone = phone.replace(/\D/g, '');
+  const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+
+  // Format message text
+  const message = `🎉 *Order Confirmed!* 🎉\n\nHi ${order.shippingAddress.fullName.split(' ')[0]},\n\nYour Frizly Crunch order *${order.id}* has been successfully placed.\n\nTotal: ₹${order.total}\n\nWe will notify you once it's shipped! 🚚`;
+
+  try {
+    const response = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: formattedPhone,
+        type: 'text',
+        text: { body: message }
+      })
+    });
+
+    if (!response.ok) {
+      console.error('[Mailer] Failed to send WhatsApp:', await response.text());
+    } else {
+      console.log(`[Mailer] WhatsApp confirmation sent to ${formattedPhone}`);
+    }
+  } catch (error) {
+    console.error('[Mailer] Error sending WhatsApp:', error);
+  }
+}
+

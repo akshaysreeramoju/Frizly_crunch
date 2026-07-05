@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
-import { sendAdminOrderNotification, sendCustomerOrderConfirmation } from '@/lib/mailer';
+import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendCustomerWhatsAppConfirmation } from '@/lib/mailer';
 
 function generateOrderId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -74,6 +74,7 @@ export async function POST(req: Request) {
     await Promise.allSettled([
       sendAdminOrderNotification(order),
       sendCustomerOrderConfirmation(order),
+      sendCustomerWhatsAppConfirmation(order),
     ]).catch((e) => console.error('Notification error:', e));
 
     return NextResponse.json({ success: true, orderId });
