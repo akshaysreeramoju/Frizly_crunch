@@ -59,40 +59,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authError, setAuthError] = useState('');
 
-  // Listen to Firebase auth state — persists across refreshes automatically
+  // ── Step 1: Set persistence immediately at startup ─────────────────────────
+  // Must be done before any sign-in attempt, including processing redirect results.
+  // We do this once, at mount, so it's active even when the page loads after a redirect.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          displayName: firebaseUser.displayName,
-          email: firebaseUser.email,
-          phoneNumber: firebaseUser.phoneNumber,
-          photoURL: firebaseUser.photoURL,
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
   }, []);
 
-  // Handle redirect result on load for mobile Google sign-in
+  // ── Step 2: Process the Google redirect result FIRST, then listen to auth state ─
+  // getRedirectResult() MUST be awaited before onAuthStateChanged resolves loading=false.
+  // If loading turns false first, components that require login may redirect the user
+  // away before the auth result is processed — causing the visible redirect loop.
   useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
     getRedirectResult(auth)
       .then((result) => {
         if (result) {
+          console.log('[Auth] Redirect sign-in succeeded:', result.user.email);
           closeAuthModal();
+        } else {
+          console.log('[Auth] No redirect result (normal page load or popup flow).');
         }
       })
       .catch((err: unknown) => {
-        console.error('Redirect auth error:', err);
+        console.error('[Auth] getRedirectResult error:', err);
         const error = err as { code?: string; message?: string };
-        if (error.code !== 'auth/popup-closed-by-user') {
+        if (
+          error.code !== 'auth/popup-closed-by-user' &&
+          error.code !== 'auth/cancelled-popup-request'
+        ) {
           setAuthError('Google sign-in failed. Please try again.');
         }
+      })
+      .finally(() => {
+        // After redirect result is resolved (either way), start listening to auth state.
+        // This is the ONLY place setLoading(false) is triggered, preventing a flash
+        // of the logged-out state before the redirect result is processed.
+        unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+          if (firebaseUser) {
+            setUser({
+              uid: firebaseUser.uid,
+              displayName: firebaseUser.displayName,
+              email: firebaseUser.email,
+              phoneNumber: firebaseUser.phoneNumber,
+              photoURL: firebaseUser.photoURL,
+            });
+          } else {
+            setUser(null);
+          }
+          setLoading(false);
+        });
       });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openAuthModal = () => { setAuthError(''); setIsAuthModalOpen(true); };
@@ -104,36 +127,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
 
-      // Ensure auth state persists in localStorage (survives page reloads)
-      await setPersistence(auth, browserLocalPersistence);
-
       // On mobile, popups are blocked or fail silently in Safari and in-app browsers.
-      // Detect mobile and go straight to redirect for reliable auth.
+      // Go straight to redirect — getRedirectResult() above will handle the result.
       const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(
         typeof navigator !== 'undefined' ? navigator.userAgent : ''
       );
 
       if (isMobile) {
-        // Redirect flow: page reloads, getRedirectResult() in the useEffect picks up the result.
         await signInWithRedirect(auth, provider);
         return;
       }
 
-      // Desktop: try popup first — no page reload, auth state is immediately available.
-      // Fall back to redirect only if the popup is explicitly blocked.
+      // Desktop: try popup first, fall back to redirect if blocked.
       try {
         await signInWithPopup(auth, provider);
-        // Popup succeeded — modal will close via the useEffect in AuthModal
-        // that watches the user state from onAuthStateChanged.
       } catch (popupErr: unknown) {
         const err = popupErr as { code?: string };
         if (err.code === 'auth/popup-blocked') {
-          // Popup was blocked by the browser — fall back to redirect
           console.warn('[Auth] Popup blocked, falling back to redirect...');
           await signInWithRedirect(auth, provider);
         } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-          // User dismissed the popup — not an error, just do nothing
-          return;
+          return; // User dismissed — not an error
         } else {
           throw popupErr;
         }

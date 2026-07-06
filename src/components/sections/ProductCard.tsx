@@ -10,9 +10,8 @@ import { toast } from '@/components/ui/Toast';
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
-  priority?: boolean;
+  priority?: boolean
 }
-
 export function ProductCard({ product, onQuickView, priority = false }: ProductCardProps) {
   const { dispatch } = useCart();
   const { user, openAuthModal } = useAuth();
@@ -22,7 +21,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
       openAuthModal();
       toast('🔒 Please login to add items to cart');
       return;
-    }
+    }//
     dispatch({ type: 'ADD_ITEM', payload: { product } });
     toast(`🛒 ${product.name} added to cart!`);
   };
@@ -48,7 +47,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, 300px"
         />
-        
+
         {/* Overlay */}
         <div className="absolute inset-0 bg-brand-dark/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
@@ -70,13 +69,13 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
             {product.name}
           </h3>
         </Link>
-        
+
 
 
         <p className="text-[0.78rem] text-brand-text-lt leading-[1.5] mb-3 line-clamp-2">
           {product.desc}
         </p>
-        
+
         <div className="flex gap-1.5 flex-wrap mb-4">
           {product.benefits.slice(0, 3).map((b) => (
             <span
@@ -94,7 +93,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
             <div className="text-[0.65rem] font-medium text-brand-text-lt mt-0.5">Net Wt. {product.weight}</div>
           </div>
         </div>
-        
+
         <button
           onClick={handleAdd}
           className="w-full font-body text-[0.78rem] font-bold text-white bg-gradient-to-br from-brand-burgundy to-brand-burgundy-lt px-5 py-3 min-h-[44px] flex items-center justify-center rounded-xl tracking-wide hover:from-brand-gold hover:to-brand-gold-lt hover:text-brand-dark hover:scale-[1.02] hover:shadow-sm transition-all"
