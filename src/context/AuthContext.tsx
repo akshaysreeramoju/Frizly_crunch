@@ -85,12 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch((err: unknown) => {
         console.error('[Auth] getRedirectResult error:', err);
         const error = err as { code?: string; message?: string };
-        if (
-          error.code !== 'auth/popup-closed-by-user' &&
-          error.code !== 'auth/cancelled-popup-request'
-        ) {
-          setAuthError('Google sign-in failed. Please try again.');
-        }
+        // Show the exact Firebase error code on-screen so we can diagnose
+        // silent failures (e.g. auth/unauthorized-domain) on mobile
+        const msg = error.code
+          ? `Sign-in error: ${error.code}`
+          : error.message
+          ? `Sign-in error: ${error.message}`
+          : 'Google sign-in failed. Please try again.';
+        setAuthError(msg);
+        setIsAuthModalOpen(true);
       })
       .finally(() => {
         // After redirect result is resolved (either way), start listening to auth state.
