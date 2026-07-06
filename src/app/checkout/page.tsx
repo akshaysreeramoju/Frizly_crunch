@@ -244,20 +244,12 @@ export default function CheckoutPage() {
               <h3 className="text-[0.78rem] font-bold tracking-[0.05em] uppercase text-brand-text-lt mb-3">
                 Payment Method
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <label className="flex items-center gap-3 p-4 border-2 border-brand-burgundy bg-brand-burgundy/5 rounded-xl cursor-pointer">
                   <input type="radio" name="paymentMethod" value="razorpay" defaultChecked className="w-4 h-4 text-brand-burgundy focus:ring-brand-burgundy" />
                   <div className="flex flex-col">
                     <span className="font-bold text-brand-dark text-sm">Online Payment</span>
                     <span className="text-[0.65rem] text-brand-text-lt">UPI, Cards, Netbanking</span>
-                  </div>
-                </label>
-                
-                <label className="flex items-center gap-3 p-4 border-2 border-brand-cream-dk hover:border-brand-burgundy/50 rounded-xl cursor-pointer transition-colors">
-                  <input type="radio" name="paymentMethod" value="cod" className="w-4 h-4 text-brand-burgundy focus:ring-brand-burgundy" />
-                  <div className="flex flex-col">
-                    <span className="font-bold text-brand-dark text-sm">Cash on Delivery</span>
-                    <span className="text-[0.65rem] text-brand-text-lt">Pay when you receive</span>
                   </div>
                 </label>
               </div>
