@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -336,8 +337,8 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-4 mb-6 max-h-[260px] overflow-y-auto pr-1">
                 {cartItems.map(({ product, qty }) => (
                   <div key={product.id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-brand-cream rounded-md flex items-center justify-center text-xl shrink-0">
-                      {product.emoji}
+                    <div className="relative w-12 h-12 bg-brand-cream rounded-md overflow-hidden shrink-0 border border-brand-cream-dk">
+                      <Image src={product.img} alt={product.name} fill className="object-cover" sizes="48px" />
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-sm text-brand-dark">{product.name}</div>

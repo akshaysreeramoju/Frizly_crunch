@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { X, ShoppingCart, Plus, Minus, Tag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -128,7 +129,9 @@ export function CartSidebar() {
                         key={product.id}
                         className="flex items-center gap-4 py-4 border-b border-brand-cream-dk"
                       >
-                        <span className="text-2xl">{product.emoji}</span>
+                        <div className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden bg-brand-cream border border-brand-cream-dk">
+                          <Image src={product.img} alt={product.name} fill className="object-cover" sizes="48px" />
+                        </div>
                         <div className="flex-1">
                           <div className="font-semibold text-sm text-brand-dark">{product.name}</div>
                           <div className="text-[0.7rem] text-brand-text-lt mt-0.5">
