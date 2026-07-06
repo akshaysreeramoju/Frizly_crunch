@@ -10,9 +10,9 @@ import { ChevronDown } from 'lucide-react';
 const HERO_IMAGES = [
   '/images/products/apple/2.jpg',
   '/images/products/custard-apple/2.jpg',
-  '/images/products/mango/2.jpg',
+  '/images/products/mango/3.jpeg',
   '/images/products/pineapple/3.jpg',
-  '/images/products/guava/1.jpg',
+  '/images/products/guava/1.jpeg',
   '/images/products/carrot/2.jpg',
 ];
 
