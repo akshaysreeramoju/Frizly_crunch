@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Product, CartItem } from '@/lib/types';
 import { getAutoDiscount } from '@/lib/coupons';
 
@@ -16,7 +16,8 @@ type CartAction =
   | { type: 'TOGGLE_CART' }
   | { type: 'OPEN_CART' }
   | { type: 'CLOSE_CART' }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'INIT_CART'; payload: { items: Record<string, CartItem> } };
 
 const initialState: CartState = {
   items: {},
@@ -72,6 +73,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, isCartOpen: false };
     case 'CLEAR_CART':
       return { ...state, items: {} };
+    case 'INIT_CART':
+      return { ...state, items: action.payload.items };
     default:
       return state;
   }
@@ -94,6 +97,27 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  // Load from local storage on mount
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('frizly_cart');
+      if (savedCart) {
+        dispatch({ type: 'INIT_CART', payload: { items: JSON.parse(savedCart) } });
+      }
+    } catch (e) {
+      console.error('Failed to load cart from local storage', e);
+    }
+  }, []);
+
+  // Save to local storage when items change
+  useEffect(() => {
+    try {
+      localStorage.setItem('frizly_cart', JSON.stringify(state.items));
+    } catch (e) {
+      console.error('Failed to save cart to local storage', e);
+    }
+  }, [state.items]);
 
   const totalItems = Object.values(state.items).reduce(
     (sum, item) => sum + item.qty,
