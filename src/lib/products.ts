@@ -38,11 +38,11 @@ export const PRODUCTS: Record<string, Product> = {
     name: 'Mangoes',
     category: 'fruit',
     emoji: '🥭',
-    img: '/images/products/mango/1.jpeg',
+    img: '/images/products/mango/3.jpeg',
     images: [
+      '/images/products/mango/3.jpeg',
       '/images/products/mango/1.jpeg',
       '/images/products/mango/2.jpeg',
-      '/images/products/mango/3.jpeg',
     ],
     desc: 'Experience the king of fruits in a whole new way. Our freeze-dried mango slices lock in the tropical sweetness and vibrant orange colour of premium Indian mangoes. A natural energy boost in every crunchy bite.',
     benefits: ['Rich in Vitamin A', 'Supports Immunity', 'Supports Skin Health'],
