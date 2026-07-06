@@ -16,7 +16,7 @@ export function CartSidebar() {
   const { isCartOpen, items } = state;
 
   const cartItems = Object.values(items);
-  const shippingCost = discountedTotal < 899 && discountedTotal > 0 ? 99 : 0;
+  const shippingCost = cartTotal < 899 && cartTotal > 0 ? 99 : 0;
   const finalTotal = discountedTotal + shippingCost;
 
   const handleCheckout = () => {

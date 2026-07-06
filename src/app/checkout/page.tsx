@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   const effectiveDiscountPercent = appliedCoupon ? couponDiscountPercent : discountPercent;
   const effectiveDiscountAmount = Math.round((cartTotal * effectiveDiscountPercent) / 100);
   const subTotalAfterDiscount = cartTotal - effectiveDiscountAmount;
-  const shippingCost = subTotalAfterDiscount < 899 && subTotalAfterDiscount > 0 ? 99 : 0;
+  const shippingCost = cartTotal < 899 && cartTotal > 0 ? 99 : 0;
   const finalTotal = subTotalAfterDiscount + shippingCost;
 
   const handleApplyCoupon = async () => {
