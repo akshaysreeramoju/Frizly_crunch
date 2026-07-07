@@ -166,14 +166,20 @@ export default function CheckoutPage() {
               dispatch({ type: 'CLEAR_CART' });
               router.push(`/order/${verifyData.orderId}`);
             } else {
-              throw new Error(verifyData.message || 'Payment verification failed');
+              // Handle inline — do NOT throw here. The outer try/catch in
+              // handleSubmit is already done; any throw from inside Razorpay's
+              // async handler callback silently disappears, leaving the
+              // button stuck on "Processing..." forever.
+              toast(`❌ ${verifyData.message || 'Verification failed. Please contact support.'}`);
+              setIsSubmitting(false);
             }
           } catch (err: any) {
             clearTimeout(timeoutId);
+            // NEVER re-throw from inside this handler — same reason as above.
             if (err?.name === 'AbortError') {
-              toast('⚠️ Confirmation is taking longer than expected. Your payment may have gone through — please check your email or contact support.');
+              toast('⚠️ Confirmation timed out. Your payment may have gone through — check your email or contact support.');
             } else {
-              throw err;
+              toast(`❌ ${err instanceof Error ? err.message : 'Verification failed. Contact support — your payment may have gone through.'}`);
             }
             setIsSubmitting(false);
           }
