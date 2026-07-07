@@ -25,6 +25,8 @@ export async function POST(req: Request) {
       userId,
       discountPercent,
       discountAmount,
+      couponCode,
+      shippingCost,
       total,
     } = body;
 
@@ -53,6 +55,8 @@ export async function POST(req: Request) {
       userId: userId || null,
       discountPercent: discountPercent || 0,
       discountAmount: discountAmount || 0,
+      couponCode: couponCode || null,
+      shippingCost: shippingCost || 0,
       total,
       status: 'PROCESSING',
       createdAt: new Date().toISOString(),
@@ -70,12 +74,20 @@ export async function POST(req: Request) {
     orders.push(order);
     await fs.writeFile(ordersFile, JSON.stringify(orders, null, 2));
 
-    // --- Send notifications ---
-    await Promise.allSettled([
+    // --- Respond to frontend immediately so the spinner resolves ---
+    // Notifications are intentionally fire-and-forget: any SMTP/WhatsApp
+    // latency or failure must NOT block the checkout confirmation.
+    void Promise.allSettled([
       sendAdminOrderNotification(order),
       sendCustomerOrderConfirmation(order),
       sendCustomerWhatsAppConfirmation(order),
-    ]).catch((e) => console.error('Notification error:', e));
+    ]).then((results) => {
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          console.error(`[Notify] Task ${i} failed:`, r.reason);
+        }
+      });
+    });
 
     return NextResponse.json({ success: true, orderId });
   } catch (error) {

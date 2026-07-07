@@ -46,7 +46,10 @@ function createTransporter() {
   });
 }
 
-const FROM_ADDRESS = `"Frizly Crunch" <${process.env.SMTP_USER || 'orders@frizlycrunch.com'}>`;
+// When using Resend, the sender must be a verified domain address (not Gmail).
+const FROM_ADDRESS = process.env.RESEND_API_KEY
+  ? `"Frizly Crunch" <orders@frizlycrunch.com>`
+  : `"Frizly Crunch" <${process.env.SMTP_USER || 'orders@frizlycrunch.com'}>`;
 
 // ---------------------------------------------------------------------------
 // Helper: format order items for email
@@ -172,6 +175,7 @@ export async function sendCustomerOrderConfirmation(order: {
   total: number;
   discountAmount?: number;
   couponCode?: string | null;
+  shippingCost?: number;
   createdAt: string;
 }) {
   const customerEmail = order.shippingAddress.email;
@@ -223,7 +227,8 @@ export async function sendCustomerOrderConfirmation(order: {
 
       <!-- Totals -->
       <div style="border-top:2px solid #f0e8d8;padding-top:14px;font-size:14px;">
-        ${order.discountAmount ? `<div style="color:#7A8F6A;margin-bottom:6px;">💚 Discount applied: −₹${order.discountAmount}</div>` : ''}
+        ${order.discountAmount ? `<div style="color:#7A8F6A;margin-bottom:6px;">💚 Discount applied${order.couponCode ? ` (${order.couponCode})` : ''}: −₹${order.discountAmount}</div>` : ''}
+        ${order.shippingCost && order.shippingCost > 0 ? `<div style="margin-bottom:6px;color:#3d2c1e;">🚚 Shipping: ₹${order.shippingCost}</div>` : `<div style="margin-bottom:6px;color:#7A8F6A;">🚚 Shipping: FREE</div>`}
         <div style="font-size:18px;font-weight:bold;color:#6B1E1E;">Total Paid: ₹${order.total}</div>
       </div>
 

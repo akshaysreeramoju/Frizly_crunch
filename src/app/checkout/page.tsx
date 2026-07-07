@@ -136,31 +136,46 @@ export default function CheckoutPage() {
         theme: { color: '#6B1E1E' },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: async (response: any) => {
-          // 3. Verify & save order
-          const verifyRes = await fetch('/api/razorpay/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              items: cartItems,
-              shippingAddress: { ...formData },
-              userId: user?.uid || null,
-              discountPercent: effectiveDiscountPercent,
-              discountAmount: effectiveDiscountAmount,
-              couponCode: appliedCoupon || null,
-              shippingCost,
-              total: finalTotal,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            toast('🎉 Payment successful! Order confirmed.');
-            dispatch({ type: 'CLEAR_CART' });
-            router.push(`/order/${verifyData.orderId}`);
-          } else {
-            throw new Error(verifyData.message || 'Payment verification failed');
+          // 3. Verify & save order — with a 30-second safety timeout
+          // so the button never stays stuck on "Processing…" forever.
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30_000);
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: controller.signal,
+              body: JSON.stringify({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+                items: cartItems,
+                shippingAddress: { ...formData },
+                userId: user?.uid || null,
+                discountPercent: effectiveDiscountPercent,
+                discountAmount: effectiveDiscountAmount,
+                couponCode: appliedCoupon || null,
+                shippingCost,
+                total: finalTotal,
+              }),
+            });
+            clearTimeout(timeoutId);
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              toast('🎉 Payment successful! Order confirmed.');
+              dispatch({ type: 'CLEAR_CART' });
+              router.push(`/order/${verifyData.orderId}`);
+            } else {
+              throw new Error(verifyData.message || 'Payment verification failed');
+            }
+          } catch (err: any) {
+            clearTimeout(timeoutId);
+            if (err?.name === 'AbortError') {
+              toast('⚠️ Confirmation is taking longer than expected. Your payment may have gone through — please check your email or contact support.');
+            } else {
+              throw err;
+            }
+            setIsSubmitting(false);
           }
         },
         modal: { ondismiss: () => setIsSubmitting(false) },
