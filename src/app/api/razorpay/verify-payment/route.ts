@@ -62,17 +62,22 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to orders.json
-    const ordersFile = path.join(process.cwd(), 'orders.json');
-    let orders = [];
+    // Save to orders.json (Note: This will throw an error on Vercel due to a read-only filesystem,
+    // so we catch it and ignore it. The admin order email serves as the system of record).
     try {
-      const fileData = await fs.readFile(ordersFile, 'utf-8');
-      orders = JSON.parse(fileData);
-    } catch {
-      // File doesn't exist yet
+      const ordersFile = path.join(process.cwd(), 'orders.json');
+      let orders = [];
+      try {
+        const fileData = await fs.readFile(ordersFile, 'utf-8');
+        orders = JSON.parse(fileData);
+      } catch {
+        // File doesn't exist yet
+      }
+      orders.push(order);
+      await fs.writeFile(ordersFile, JSON.stringify(orders, null, 2));
+    } catch (fsError) {
+      console.warn('[Vercel Note] Could not save to orders.json (read-only filesystem):', (fsError as Error).message);
     }
-    orders.push(order);
-    await fs.writeFile(ordersFile, JSON.stringify(orders, null, 2));
 
     // --- Respond to frontend immediately so the spinner resolves ---
     // Notifications are intentionally fire-and-forget: any SMTP/WhatsApp
