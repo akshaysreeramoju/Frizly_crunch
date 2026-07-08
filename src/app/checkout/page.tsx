@@ -197,24 +197,28 @@ export default function CheckoutPage() {
             clearTimeout(timeoutId);
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              // 4. Save to Firestore client-side so user can see it in "My Orders" immediately
+              // Fire-and-forget: save to Firestore in the background.
+              // Do NOT await — this must never block the redirect.
               if (user && verifyData.order) {
-                try {
-                  if (saveAddressForFuture) {
-                    await setDoc(doc(db, 'users', user.uid), {
-                      savedAddress: formData,
-                      updatedAt: serverTimestamp()
-                    }, { merge: true });
+                (async () => {
+                  try {
+                    if (saveAddressForFuture) {
+                      await setDoc(doc(db, 'users', user.uid), {
+                        savedAddress: formData,
+                        updatedAt: serverTimestamp()
+                      }, { merge: true });
+                    }
+                    await setDoc(doc(db, 'orders', verifyData.orderId), {
+                      ...verifyData.order,
+                      userId: user.uid,
+                      status: 'PAID',
+                      timestamp: serverTimestamp()
+                    });
+                    console.log('[Firestore] Order & address saved');
+                  } catch (err) {
+                    console.error('[Firestore] Failed to save order/address:', err);
                   }
-                  await setDoc(doc(db, 'orders', verifyData.orderId), {
-                    ...verifyData.order,
-                    userId: user.uid,
-                    status: 'PAID',
-                    timestamp: serverTimestamp()
-                  });
-                } catch (err) {
-                  console.error('[Firestore] Failed to save order/address', err);
-                }
+                })();
               }
 
               toast('🎉 Payment successful! Order confirmed.');
