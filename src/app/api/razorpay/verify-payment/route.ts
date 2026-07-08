@@ -85,33 +85,32 @@ export async function POST(req: Request) {
       console.warn('[verify-payment] orders.json write skipped (Vercel read-only FS):', (fsError as Error).message);
     }
 
-    // --- Send notifications BEFORE returning response ---
-    // CRITICAL: Vercel serverless terminates immediately after return.
-    // Any fire-and-forget (void) code after return NEVER runs.
-    // We must await all notifications before returning to ensure delivery.
+    // --- Send notifications then respond ---
+    // Emails are raced against an 8-second deadline so the API always
+    // responds promptly and the user is never stuck on "Processing…".
+    // SMTP typically finishes within 3-5s; the race just provides a safety net.
     console.log('[verify-payment] Starting email notifications...');
-    console.log(`[verify-payment] SMTP_USER=${process.env.SMTP_USER ? 'SET' : 'NOT SET'}, ADMIN_EMAIL=${process.env.ADMIN_EMAIL ? 'SET' : 'NOT SET'}`);
+    console.log(`[verify-payment] SMTP_USER=${process.env.SMTP_USER ? 'SET' : 'NOT SET'}, ADMIN_EMAIL=${process.env.ADMIN_EMAIL || 'hello@frizlycrunch.com (default)'}`);
 
-    const notifyResults = await Promise.allSettled([
-      sendAdminOrderNotification(order).then(() => {
-        console.log(`[verify-payment] ✅ Admin email sent for order ${orderId}`);
-      }),
-      sendCustomerOrderConfirmation(order).then(() => {
-        console.log(`[verify-payment] ✅ Customer email sent for order ${orderId} to ${shippingAddress?.email}`);
-      }),
-      sendCustomerWhatsAppConfirmation(order).then(() => {
-        console.log(`[verify-payment] ✅ WhatsApp sent for order ${orderId}`);
-      }),
+    const EMAIL_TIMEOUT_MS = 8000;
+    const emailDeadline = new Promise<void>(resolve => setTimeout(resolve, EMAIL_TIMEOUT_MS));
+
+    await Promise.race([
+      Promise.allSettled([
+        sendAdminOrderNotification(order).then(() => {
+          console.log(`[verify-payment] ✅ Admin email sent for order ${orderId}`);
+        }).catch(e => console.error(`[verify-payment] ❌ Admin email FAILED:`, e)),
+        sendCustomerOrderConfirmation(order).then(() => {
+          console.log(`[verify-payment] ✅ Customer email sent for order ${orderId} to ${shippingAddress?.email}`);
+        }).catch(e => console.error(`[verify-payment] ❌ Customer email FAILED:`, e)),
+        sendCustomerWhatsAppConfirmation(order).then(() => {
+          console.log(`[verify-payment] ✅ WhatsApp sent for order ${orderId}`);
+        }).catch(e => console.error(`[verify-payment] ❌ WhatsApp FAILED:`, e)),
+      ]),
+      emailDeadline.then(() => console.warn(`[verify-payment] ⏱ Email deadline (${EMAIL_TIMEOUT_MS}ms) reached — responding now`)),
     ]);
 
-    notifyResults.forEach((result, i) => {
-      const label = ['Admin email', 'Customer email', 'WhatsApp'][i];
-      if (result.status === 'rejected') {
-        console.error(`[verify-payment] ❌ ${label} FAILED for order ${orderId}:`, result.reason);
-      }
-    });
-
-    console.log(`[verify-payment] All notifications complete — responding with success for order ${orderId}`);
+    console.log(`[verify-payment] Responding with success for order ${orderId}`);
     // Return full order data so client can persist it to Firestore
     return NextResponse.json({ success: true, orderId, order });
 
