@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
 import { ShieldCheck, Truck, Gift, Lock } from 'lucide-react';
 import { LAUNCH_TIERS } from '@/lib/coupons';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 declare global {
   interface Window {
@@ -28,6 +30,8 @@ export default function CheckoutPage() {
   const [couponDiscountPercent, setCouponDiscountPercent] = useState(0);
   const [couponError, setCouponError] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [fetchingAddress, setFetchingAddress] = useState(true);
+  const [saveAddressForFuture, setSaveAddressForFuture] = useState(true);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -40,16 +44,46 @@ export default function CheckoutPage() {
 
   const cartItems = Object.values(state.items);
 
-  // Pre-fill from logged-in user
+  // Pre-fill from logged-in user and fetch saved address
   useEffect(() => {
-    if (user) {
+    let isMounted = true;
+    async function loadUserData() {
+      if (!user) {
+        setFetchingAddress(false);
+        return;
+      }
+      
       setFormData(prev => ({
         ...prev,
         fullName: prev.fullName || user.displayName || '',
         email:    prev.email    || user.email || '',
         phone:    prev.phone    || user.phoneNumber?.replace('+91', '').trim() || '',
       }));
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists() && isMounted) {
+          const data = userDoc.data();
+          if (data.savedAddress) {
+            setFormData(prev => ({
+              ...prev,
+              fullName: data.savedAddress.fullName || prev.fullName,
+              email: data.savedAddress.email || prev.email,
+              address: data.savedAddress.address || prev.address,
+              city: data.savedAddress.city || prev.city,
+              pincode: data.savedAddress.pincode || prev.pincode,
+              phone: data.savedAddress.phone || prev.phone,
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load saved address', err);
+      } finally {
+        if (isMounted) setFetchingAddress(false);
+      }
     }
+    loadUserData();
+    return () => { isMounted = false; };
   }, [user]);
 
   // Load Razorpay checkout.js
@@ -162,6 +196,26 @@ export default function CheckoutPage() {
             clearTimeout(timeoutId);
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
+              // 4. Save to Firestore client-side so user can see it in "My Orders" immediately
+              if (user && verifyData.order) {
+                try {
+                  if (saveAddressForFuture) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                      savedAddress: formData,
+                      updatedAt: serverTimestamp()
+                    }, { merge: true });
+                  }
+                  await setDoc(doc(db, 'orders', verifyData.orderId), {
+                    ...verifyData.order,
+                    userId: user.uid,
+                    status: 'PAID',
+                    timestamp: serverTimestamp()
+                  });
+                } catch (err) {
+                  console.error('[Firestore] Failed to save order/address', err);
+                }
+              }
+
               toast('🎉 Payment successful! Order confirmed.');
               dispatch({ type: 'CLEAR_CART' });
               router.push(`/order/${verifyData.orderId}`);
@@ -259,6 +313,15 @@ export default function CheckoutPage() {
                   placeholder="98765 43210" />
               </div>
             </div>
+
+            {user && (
+              <div className="mb-10 flex items-center gap-3 bg-brand-cream-dk/30 p-4 rounded-xl border border-brand-cream-dk">
+                <input type="checkbox" id="saveAddr" checked={saveAddressForFuture} onChange={(e) => setSaveAddressForFuture(e.target.checked)} className="w-4 h-4 text-brand-burgundy rounded border-brand-cream-dk focus:ring-brand-burgundy" />
+                <label htmlFor="saveAddr" className="text-sm font-medium text-brand-dark select-none cursor-pointer">
+                  Save this address for future checkouts
+                </label>
+              </div>
+            )}
 
             {/* Visible Payment Options */}
             <div className="mb-6">

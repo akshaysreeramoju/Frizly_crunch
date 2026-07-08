@@ -2,20 +2,50 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { Package, MapPin, User, LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Package, MapPin, User, LogOut, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { db } from '@/lib/firebase';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 
 export default function OrdersPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [orders, setOrders] = useState<any[]>([]);
+  const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    async function fetchOrders() {
+      try {
+        const q = query(
+          collection(db, 'orders'),
+          where('userId', '==', user!.uid),
+          orderBy('timestamp', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        const fetchedOrders = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          _docId: doc.id
+        }));
+        setOrders(fetchedOrders);
+      } catch (err) {
+        console.error('Failed to fetch orders:', err);
+      } finally {
+        setFetching(false);
+      }
+    }
+    fetchOrders();
+  }, [user]);
 
   if (loading || !user) {
     return <div className="min-h-screen bg-brand-cream pt-32 pb-16 px-4 flex items-center justify-center">Loading...</div>;
@@ -61,13 +91,49 @@ export default function OrdersPage() {
             <div className="bg-white p-8 rounded-3xl border border-brand-cream-dk shadow-sm">
               <h3 className="font-display text-xl font-bold text-brand-dark mb-6">Order History</h3>
               
-              {/* Empty state for mock */}
-              <div className="text-center py-16 bg-brand-cream/50 rounded-2xl border border-dashed border-brand-cream-dk">
-                <Package className="w-12 h-12 text-brand-gold mx-auto mb-4" />
-                <p className="text-brand-dark font-medium text-lg mb-2">No orders found</p>
-                <p className="text-sm text-brand-text-lt mb-6">Looks like you haven't made your first order yet.</p>
-                <Button onClick={() => router.push('/products')}>Browse Products</Button>
-              </div>
+              {fetching ? (
+                <div className="text-center py-16">
+                  <div className="w-8 h-8 border-4 border-brand-cream-dk border-t-brand-burgundy rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-brand-text-lt">Loading orders...</p>
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-16 bg-brand-cream/50 rounded-2xl border border-dashed border-brand-cream-dk">
+                  <Package className="w-12 h-12 text-brand-gold mx-auto mb-4" />
+                  <p className="text-brand-dark font-medium text-lg mb-2">No orders found</p>
+                  <p className="text-sm text-brand-text-lt mb-6">Looks like you haven't made your first order yet.</p>
+                  <Button onClick={() => router.push('/#products')}>Browse Products</Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {orders.map((order, i) => {
+                    const totalItems = order.items?.reduce((sum: number, item: any) => sum + item.qty, 0) || 0;
+                    const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric'
+                    }) : 'Recent';
+
+                    return (
+                      <Link href={`/order/${order.id}`} key={order.id || i} className="group block border border-brand-cream-dk rounded-2xl p-5 hover:border-brand-burgundy/30 hover:shadow-md transition-all bg-white">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="font-bold text-brand-burgundy">{order.id}</span>
+                              <span className="px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold tracking-wider uppercase">
+                                PAID
+                              </span>
+                            </div>
+                            <p className="text-sm text-brand-text-lt">
+                              {date} &nbsp;·&nbsp; {totalItems} item{totalItems !== 1 ? 's' : ''} &nbsp;·&nbsp; <strong className="text-brand-dark">₹{order.total}</strong>
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 text-brand-sage font-semibold text-sm group-hover:text-brand-burgundy transition-colors">
+                            View Details <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

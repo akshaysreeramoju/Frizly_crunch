@@ -15,7 +15,7 @@ export const PRODUCTS: Record<string, Product> = {
     desc: 'Can\'t decide? Try our variety trail mix to taste the best of our freeze-dried fruits. A perfect combination of 100% real fruit in one convenient pouch.',
     benefits: ['Variety of Flavours', 'Great for Tasting', '100% Natural', 'Light & Crunchy'],
     weight: '130g',
-    price: 659
+    price: 1
   },
   'custard-apple': {
     id: 'custard-apple',

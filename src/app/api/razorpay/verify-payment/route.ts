@@ -14,6 +14,7 @@ function generateOrderId() {
 }
 
 export async function POST(req: Request) {
+  console.log('[verify-payment] Request received');
   try {
     const body = await req.json();
     const {
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
       total,
     } = body;
 
+    console.log(`[verify-payment] Verifying signature for order: ${razorpayOrderId}, payment: ${razorpayPaymentId}`);
+
     // --- Verify Razorpay signature ---
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
@@ -37,11 +40,14 @@ export async function POST(req: Request) {
       .digest('hex');
 
     if (expectedSignature !== razorpaySignature) {
+      console.error('[verify-payment] Signature mismatch — payment verification failed');
       return NextResponse.json(
         { success: false, message: 'Payment verification failed. Please contact support.' },
         { status: 400 }
       );
     }
+
+    console.log('[verify-payment] Signature verified ✅ — creating order record');
 
     // --- Create internal order record ---
     const orderId = generateOrderId();
@@ -62,41 +68,56 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to orders.json (Note: This will throw an error on Vercel due to a read-only filesystem,
-    // so we catch it and ignore it. The admin order email serves as the system of record).
+    console.log(`[verify-payment] Order created: ${orderId}`);
+
+    // Save to orders.json locally (will fail silently on Vercel read-only FS — that's OK)
     try {
       const ordersFile = path.join(process.cwd(), 'orders.json');
       let orders = [];
       try {
         const fileData = await fs.readFile(ordersFile, 'utf-8');
         orders = JSON.parse(fileData);
-      } catch {
-        // File doesn't exist yet
-      }
+      } catch { /* file doesn't exist */ }
       orders.push(order);
       await fs.writeFile(ordersFile, JSON.stringify(orders, null, 2));
+      console.log('[verify-payment] Order saved to orders.json (local dev)');
     } catch (fsError) {
-      console.warn('[Vercel Note] Could not save to orders.json (read-only filesystem):', (fsError as Error).message);
+      console.warn('[verify-payment] orders.json write skipped (Vercel read-only FS):', (fsError as Error).message);
     }
 
-    // --- Respond to frontend immediately so the spinner resolves ---
-    // Notifications are intentionally fire-and-forget: any SMTP/WhatsApp
-    // latency or failure must NOT block the checkout confirmation.
-    void Promise.allSettled([
-      sendAdminOrderNotification(order),
-      sendCustomerOrderConfirmation(order),
-      sendCustomerWhatsAppConfirmation(order),
-    ]).then((results) => {
-      results.forEach((r, i) => {
-        if (r.status === 'rejected') {
-          console.error(`[Notify] Task ${i} failed:`, r.reason);
-        }
-      });
+    // --- Send notifications BEFORE returning response ---
+    // CRITICAL: Vercel serverless terminates immediately after return.
+    // Any fire-and-forget (void) code after return NEVER runs.
+    // We must await all notifications before returning to ensure delivery.
+    console.log('[verify-payment] Starting email notifications...');
+    console.log(`[verify-payment] SMTP_USER=${process.env.SMTP_USER ? 'SET' : 'NOT SET'}, ADMIN_EMAIL=${process.env.ADMIN_EMAIL ? 'SET' : 'NOT SET'}`);
+
+    const notifyResults = await Promise.allSettled([
+      sendAdminOrderNotification(order).then(() => {
+        console.log(`[verify-payment] ✅ Admin email sent for order ${orderId}`);
+      }),
+      sendCustomerOrderConfirmation(order).then(() => {
+        console.log(`[verify-payment] ✅ Customer email sent for order ${orderId} to ${shippingAddress?.email}`);
+      }),
+      sendCustomerWhatsAppConfirmation(order).then(() => {
+        console.log(`[verify-payment] ✅ WhatsApp sent for order ${orderId}`);
+      }),
+    ]);
+
+    notifyResults.forEach((result, i) => {
+      const label = ['Admin email', 'Customer email', 'WhatsApp'][i];
+      if (result.status === 'rejected') {
+        console.error(`[verify-payment] ❌ ${label} FAILED for order ${orderId}:`, result.reason);
+      }
     });
 
-    return NextResponse.json({ success: true, orderId });
+    console.log(`[verify-payment] All notifications complete — responding with success for order ${orderId}`);
+    // Return full order data so client can persist it to Firestore
+    return NextResponse.json({ success: true, orderId, order });
+
   } catch (error) {
-    console.error('Payment verification error:', error);
+    console.error('[verify-payment] Unhandled error:', error);
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
+

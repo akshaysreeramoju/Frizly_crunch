@@ -285,7 +285,7 @@ export async function sendAdminOrderNotification(order: {
   razorpayPaymentId?: string;
   createdAt: string;
 }) {
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL || 'hello@frizlycrunch.com';
   if (!adminEmail) {
     console.warn('[Mailer] ADMIN_EMAIL not set — skipping admin notification');
     return;
