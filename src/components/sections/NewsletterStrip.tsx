@@ -11,13 +11,14 @@ export function NewsletterStrip() {
           Get recipes, exclusive offers, and early access to our newest seasonal crunches.
         </p>
         
-        <form className="flex flex-col sm:flex-row gap-3 max-w-[500px] mx-auto" onSubmit={(e) => e.preventDefault()}>
+        <form suppressHydrationWarning className="flex flex-col sm:flex-row gap-3 max-w-[500px] mx-auto" onSubmit={(e) => e.preventDefault()}>
           <input 
+            suppressHydrationWarning
             type="email" 
             placeholder="Enter your email or WhatsApp number" 
             className="flex-1 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 outline-none focus:border-brand-gold transition-colors"
           />
-          <button className="px-8 py-4 rounded-full bg-brand-gold text-brand-dark font-bold hover:bg-brand-gold-lt transition-colors">
+          <button suppressHydrationWarning className="px-8 py-4 rounded-full bg-brand-gold text-brand-dark font-bold hover:bg-brand-gold-lt transition-colors">
             Subscribe
           </button>
         </form>
