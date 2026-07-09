@@ -51,8 +51,10 @@ export async function POST(req: Request) {
 
     // --- Create internal order record ---
     const orderId = generateOrderId();
+    const trackingId = 'TRK' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
     const order = {
       id: orderId,
+      trackingId,
       items,
       shippingAddress,
       paymentMethod: 'razorpay',

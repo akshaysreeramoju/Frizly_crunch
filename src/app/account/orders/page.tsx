@@ -6,8 +6,7 @@ import { useEffect, useState } from 'react';
 import { Package, MapPin, User, LogOut, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
 
 export default function OrdersPage() {
   const { user, loading, logout } = useAuth();
@@ -27,17 +26,17 @@ export default function OrdersPage() {
     if (!user) return;
     async function fetchOrders() {
       try {
-        const q = query(
-          collection(db, 'orders'),
-          where('userId', '==', user!.uid),
-          orderBy('timestamp', 'desc')
-        );
-        const snapshot = await getDocs(q);
-        const fetchedOrders = snapshot.docs.map(doc => ({
-          ...doc.data(),
-          _docId: doc.id
-        }));
-        setOrders(fetchedOrders);
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('firebase_uid', user!.uid)
+          .order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error('Failed to fetch orders from Supabase:', error);
+        } else if (data) {
+          setOrders(data);
+        }
       } catch (err) {
         console.error('Failed to fetch orders:', err);
       } finally {
@@ -107,7 +106,7 @@ export default function OrdersPage() {
                 <div className="flex flex-col gap-4">
                   {orders.map((order, i) => {
                     const totalItems = order.items?.reduce((sum: number, item: any) => sum + item.qty, 0) || 0;
-                    const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                    const date = order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', {
                       day: 'numeric', month: 'short', year: 'numeric'
                     }) : 'Recent';
 
@@ -122,7 +121,7 @@ export default function OrdersPage() {
                               </span>
                             </div>
                             <p className="text-sm text-brand-text-lt">
-                              {date} &nbsp;·&nbsp; {totalItems} item{totalItems !== 1 ? 's' : ''} &nbsp;·&nbsp; <strong className="text-brand-dark">₹{order.total}</strong>
+                              {date} &nbsp;·&nbsp; {totalItems} item{totalItems !== 1 ? 's' : ''} &nbsp;·&nbsp; <strong className="text-brand-dark">₹{order.total_amount || order.total}</strong>
                             </p>
                           </div>
                           <div className="flex items-center gap-2 text-brand-sage font-semibold text-sm group-hover:text-brand-burgundy transition-colors">

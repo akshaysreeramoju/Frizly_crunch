@@ -4,8 +4,7 @@ import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Package, ArrowRight, MapPin, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 export default function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,9 +18,14 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
   useEffect(() => {
     async function fetchOrder() {
       try {
-        const orderDoc = await getDoc(doc(db, 'orders', orderId));
-        if (orderDoc.exists()) {
-          setOrder(orderDoc.data());
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .single();
+          
+        if (data) {
+          setOrder(data);
         }
       } catch (err) {
         console.error('Failed to fetch order', err);
@@ -46,7 +50,7 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
     );
   }
 
-  const date = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', {
+  const date = order.created_at ? new Date(order.created_at).toLocaleString('en-IN', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   }) : 'Recent';
 
@@ -74,14 +78,14 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
             <p className="text-xs font-bold tracking-wider uppercase text-brand-text-lt mb-1">Status</p>
             <div className="flex items-center gap-2 mb-4">
                <span className="px-2.5 py-1 rounded-md bg-yellow-100 text-yellow-800 text-xs font-bold tracking-wider uppercase">
-                {order.status === 'PAID' ? 'PROCESSING' : order.status}
+                {order.order_status || order.status}
               </span>
             </div>
             
             <p className="text-xs font-bold tracking-wider uppercase text-brand-text-lt mb-1">Payment</p>
             <div className="flex items-center gap-2 text-brand-dark font-medium text-sm">
               <CreditCard className="w-4 h-4 text-green-600" />
-              Paid via {order.paymentMethod === 'razorpay' ? 'Razorpay' : order.paymentMethod}
+              Paid via {order.payment_status === 'PAID' ? 'Razorpay' : (order.paymentMethod || 'Online')}
             </div>
           </div>
         </div>
@@ -110,21 +114,21 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
         <div className="bg-gray-50 p-5 rounded-2xl border border-brand-cream-dk mb-8">
           <div className="flex justify-between items-center text-sm text-brand-text-lt mb-2">
             <span>Subtotal</span>
-            <span>₹{order.total - (order.shippingCost || 0) + (order.discountAmount || 0)}</span>
+            <span>₹{(order.total_amount || order.total) - (order.shipping_cost || order.shippingCost || 0) + (order.discount_amount || order.discountAmount || 0)}</span>
           </div>
-          {order.discountAmount > 0 && (
+          {(order.discount_amount > 0 || order.discountAmount > 0) && (
             <div className="flex justify-between items-center text-sm text-brand-sage font-medium mb-2">
               <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
-              <span>-₹{order.discountAmount}</span>
+              <span>-₹{order.discount_amount || order.discountAmount}</span>
             </div>
           )}
           <div className="flex justify-between items-center text-sm text-brand-text-lt mb-4">
             <span>Shipping</span>
-            <span>{order.shippingCost === 0 ? 'FREE' : `₹${order.shippingCost}`}</span>
+            <span>{(order.shipping_cost === 0 || order.shippingCost === 0) ? 'FREE' : `₹${order.shipping_cost || order.shippingCost}`}</span>
           </div>
           <div className="flex justify-between items-center text-lg font-bold text-brand-burgundy border-t border-brand-cream-dk pt-3">
             <span>Total</span>
-            <span>₹{order.total}</span>
+            <span>₹{order.total_amount || order.total}</span>
           </div>
         </div>
 
@@ -133,16 +137,16 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
             <MapPin className="w-5 h-5 text-brand-burgundy" /> Delivery Address
           </h3>
           <div className="text-sm text-brand-dark leading-relaxed bg-brand-cream/30 p-4 rounded-xl border border-brand-cream-dk">
-            <p className="font-bold mb-1">{order.shippingAddress?.fullName}</p>
-            <p>{order.shippingAddress?.address}</p>
-            <p>{order.shippingAddress?.city} - {order.shippingAddress?.pincode}</p>
-            <p className="mt-2 text-brand-text-lt">📞 {order.shippingAddress?.phone}</p>
-            {order.shippingAddress?.email && <p className="text-brand-text-lt">✉️ {order.shippingAddress?.email}</p>}
+            <p className="font-bold mb-1">{order.shipping_address?.fullName || order.shippingAddress?.fullName}</p>
+            <p>{order.shipping_address?.address || order.shippingAddress?.address}</p>
+            <p>{order.shipping_address?.city || order.shippingAddress?.city} - {order.shipping_address?.pincode || order.shippingAddress?.pincode}</p>
+            <p className="mt-2 text-brand-text-lt">📞 {order.shipping_address?.phone || order.shippingAddress?.phone}</p>
+            {(order.shipping_address?.email || order.shippingAddress?.email) && <p className="text-brand-text-lt">✉️ {order.shipping_address?.email || order.shippingAddress?.email}</p>}
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href={`/track?id=${orderId}`} className="w-full sm:w-auto">
+          <Link href={`/track?trackingId=${order.tracking_id || orderId}`} className="w-full sm:w-auto">
             <Button fullWidth className="bg-brand-dark text-white hover:bg-black">
               <Package className="w-4 h-4 mr-2" /> Track Order
             </Button>

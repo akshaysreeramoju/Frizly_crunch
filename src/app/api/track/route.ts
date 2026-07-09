@@ -1,41 +1,40 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const orderId = searchParams.get('orderId');
+  const trackingId = searchParams.get('trackingId');
 
-  if (!orderId) {
-    return NextResponse.json({ success: false, message: 'Order ID is required' }, { status: 400 });
+  if (!trackingId) {
+    return NextResponse.json({ success: false, message: 'Tracking ID is required' }, { status: 400 });
   }
 
   try {
-    const ordersFile = path.join(process.cwd(), 'orders.json');
-    const fileData = await fs.readFile(ordersFile, 'utf-8');
-    const orders = JSON.parse(fileData);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('tracking_id', trackingId.toUpperCase())
+      .single();
 
-    const order = orders.find((o: any) => o.id === orderId.toUpperCase());
-
-    if (!order) {
-      return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+    if (error || !order) {
+      return NextResponse.json({ success: false, message: 'Order not found for this Tracking ID' }, { status: 404 });
     }
 
-    // For demo purposes, if order is more than 2 minutes old, change status to SHIPPED
-    // If more than 4 mins old, DELIVERED.
-    const createdDate = new Date(order.createdAt);
-    const now = new Date();
-    const diffMs = now.getTime() - createdDate.getTime();
-    
-    if (diffMs > 2 * 60 * 1000 && diffMs <= 4 * 60 * 1000) {
-      order.status = 'SHIPPED';
-    } else if (diffMs > 4 * 60 * 1000) {
-      order.status = 'DELIVERED';
-    }
+    // Map Supabase fields back to camelCase as expected by the frontend
+    const mappedOrder = {
+      id: order.id,
+      trackingId: order.tracking_id,
+      createdAt: order.created_at,
+      status: order.order_status,
+      shippingAddress: order.shipping_address,
+      paymentMethod: order.payment_status,
+      items: order.items,
+      total: order.total_amount,
+    };
 
-    return NextResponse.json({ success: true, order });
+    return NextResponse.json({ success: true, order: mappedOrder });
   } catch (error) {
     console.error('Tracking error:', error);
-    return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+    return NextResponse.json({ success: false, message: 'Tracking error' }, { status: 500 });
   }
 }

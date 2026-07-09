@@ -16,7 +16,7 @@ export function CartSidebar() {
   const { isCartOpen, items } = state;
 
   const cartItems = Object.values(items);
-  const shippingCost = cartTotal < 899 && cartTotal > 0 ? 99 : 0;
+  const shippingCost = 0;
   const finalTotal = discountedTotal + shippingCost;
 
   const handleCheckout = () => {
@@ -202,7 +202,7 @@ export function CartSidebar() {
                   </AnimatePresence>
 
                   <div className="flex justify-between items-center text-sm text-brand-text-lt">
-                    <span>Shipping {discountedTotal < 899 && <span className="text-[0.65rem] text-brand-text-lt">(Free above ₹899)</span>}</span>
+                    <span>Shipping <span className="text-[0.65rem] text-brand-text-lt">(Free for testing)</span></span>
                     <span className={shippingCost === 0 ? "text-green-600 font-semibold text-xs" : "text-brand-dark text-sm"}>
                       {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
                     </span>

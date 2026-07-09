@@ -28,18 +28,18 @@ function TrackSkeleton() {
 
 function TrackingContent() {
   const searchParams = useSearchParams();
-  const urlOrderId = searchParams.get('id');
+  const urlTrackingId = searchParams.get('id') || searchParams.get('trackingId');
 
-  const [orderIdInput, setOrderIdInput] = useState(urlOrderId || '');
+  const [trackingIdInput, setTrackingIdInput] = useState(urlTrackingId || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [order, setOrder] = useState<any>(null);
 
   useEffect(() => {
-    if (urlOrderId) {
-      handleTrack(urlOrderId);
+    if (urlTrackingId) {
+      handleTrack(urlTrackingId);
     }
-  }, [urlOrderId]);
+  }, [urlTrackingId]);
 
   const handleTrack = async (idToTrack: string) => {
     if (!idToTrack.trim()) return;
@@ -51,7 +51,7 @@ function TrackingContent() {
     try {
       // Mocking fetch delay for skeleton demonstration
       await new Promise(resolve => setTimeout(resolve, 800));
-      const res = await fetch(`/api/track?orderId=${encodeURIComponent(idToTrack)}`);
+      const res = await fetch(`/api/track?trackingId=${encodeURIComponent(idToTrack)}`);
       
       // If we don't have a real API connected yet, simulate a fallback placeholder response
       if (!res.ok) {
@@ -107,20 +107,20 @@ function TrackingContent() {
         
         <div className="text-center mb-12">
           <h1 className="font-display text-4xl font-bold text-brand-dark mb-4">Track Your Order</h1>
-          <p className="text-brand-text-lt">Enter your Order ID (e.g. FZ-A1B2C3) to see the current status.</p>
+          <p className="text-brand-text-lt">Enter your Tracking ID (e.g. TRK123456) to see the current status.</p>
         </div>
 
         {/* Search Box */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-brand-cream-dk flex gap-3 mb-10 max-w-[500px] mx-auto">
           <input
             type="text"
-            value={orderIdInput}
-            onChange={(e) => setOrderIdInput(e.target.value)}
-            placeholder="Order ID"
+            value={trackingIdInput}
+            onChange={(e) => setTrackingIdInput(e.target.value)}
+            placeholder="Tracking ID"
             className="flex-1 bg-transparent px-4 py-2 outline-none text-lg font-bold text-brand-dark uppercase placeholder:normal-case placeholder:font-normal w-full"
-            onKeyDown={(e) => e.key === 'Enter' && handleTrack(orderIdInput)}
+            onKeyDown={(e) => e.key === 'Enter' && handleTrack(trackingIdInput)}
           />
-          <Button onClick={() => handleTrack(orderIdInput)} disabled={loading}>
+          <Button onClick={() => handleTrack(trackingIdInput)} disabled={loading}>
             <Search className="w-4 h-4 mr-1 hidden sm:block" /> Track
           </Button>
         </div>
@@ -152,10 +152,10 @@ function TrackingContent() {
             <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 border-b border-brand-cream-dk pb-6 mb-10">
               <div>
                 <div className="text-[0.7rem] font-bold tracking-[0.1em] uppercase text-brand-text-lt mb-1">
-                  Order ID
+                  Tracking ID
                 </div>
                 <div className="font-display text-3xl font-bold text-brand-burgundy">
-                  {order.id}
+                  {order.trackingId || order.id}
                 </div>
               </div>
               <div className="text-left md:text-right">
@@ -221,7 +221,7 @@ function TrackingContent() {
               </div>
             ) : (
               <p className="text-center text-xs text-brand-text-lt italic">
-                Note: For this demo, orders automatically shift to 'SHIPPED' after 2 minutes, and 'DELIVERED' after 4 minutes.
+                Note: Tracking updates may take a few hours to reflect after your order is dispatched.
               </p>
             )}
 

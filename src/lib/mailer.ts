@@ -84,6 +84,7 @@ function formatItemsHtml(items: Array<{ product: { name: string; price: number }
 // ---------------------------------------------------------------------------
 export async function sendCustomerOrderConfirmation(order: {
   id: string;
+  trackingId?: string;
   items: Array<{ product: { name: string; price: number }; qty: number }>;
   shippingAddress: { fullName: string; phone: string; address: string; city: string; pincode: string; email?: string };
   total: number;
@@ -109,7 +110,7 @@ export async function sendCustomerOrderConfirmation(order: {
   const firstName = addr.fullName.split(' ')[0];
   const subtotal = order.total - (order.shippingCost || 0) + (order.discountAmount || 0);
   const siteUrl = `https://${SITE_CONFIG.contact.website}`;
-  const trackUrl = `${siteUrl}/track?id=${order.id}`;
+  const trackUrl = `${siteUrl}/track?trackingId=${order.trackingId || order.id}`;
   const orderDate = new Date(order.createdAt).toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata',
     day: 'numeric', month: 'long', year: 'numeric',
@@ -446,6 +447,7 @@ export async function sendAdminOrderNotification(order: {
 // ---------------------------------------------------------------------------
 export async function sendShippingUpdateEmail(order: {
   id: string;
+  trackingId?: string;
   shippingAddress: { fullName: string; email?: string };
   trackingNumber?: string;
   courierName?: string;
@@ -473,7 +475,7 @@ export async function sendShippingUpdateEmail(order: {
         ${order.courierName ? `<br><strong>Courier:</strong> ${order.courierName}` : ''}
         ${order.trackingNumber ? `<br><strong>Tracking #:</strong> ${order.trackingNumber}` : ''}
       </p>
-      <a href="${SITE_CONFIG.contact.website.startsWith('http') ? '' : 'https://'}${SITE_CONFIG.contact.website}/track?id=${order.id}"
+      <a href="${SITE_CONFIG.contact.website.startsWith('http') ? '' : 'https://'}${SITE_CONFIG.contact.website}/track?trackingId=${order.trackingId || order.trackingNumber || order.id}"
          style="display:inline-block;background:#6B1E1E;color:white;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:bold;margin-top:16px;">
         Track My Order
       </a>

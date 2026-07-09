@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
 import { ShieldCheck, Truck, Gift, Lock } from 'lucide-react';
 import { LAUNCH_TIERS } from '@/lib/coupons';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
 
 declare global {
   interface Window {
@@ -61,18 +60,22 @@ export default function CheckoutPage() {
       }));
 
       try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists() && isMounted) {
-          const data = userDoc.data();
-          if (data.savedAddress) {
+        const { data, error } = await supabase
+          .from('customers')
+          .select('saved_address')
+          .eq('firebase_uid', user.uid)
+          .single();
+          
+        if (data && isMounted) {
+          if (data.saved_address) {
             setFormData(prev => ({
               ...prev,
-              fullName: data.savedAddress.fullName || prev.fullName,
-              email: data.savedAddress.email || prev.email,
-              address: data.savedAddress.address || prev.address,
-              city: data.savedAddress.city || prev.city,
-              pincode: data.savedAddress.pincode || prev.pincode,
-              phone: data.savedAddress.phone || prev.phone,
+              fullName: data.saved_address.fullName || prev.fullName,
+              email: data.saved_address.email || prev.email,
+              address: data.saved_address.address || prev.address,
+              city: data.saved_address.city || prev.city,
+              pincode: data.saved_address.pincode || prev.pincode,
+              phone: data.saved_address.phone || prev.phone,
             }));
           }
         }
@@ -108,7 +111,7 @@ export default function CheckoutPage() {
   const effectiveDiscountPercent = appliedCoupon ? couponDiscountPercent : discountPercent;
   const effectiveDiscountAmount = Math.round((cartTotal * effectiveDiscountPercent) / 100);
   const subTotalAfterDiscount = cartTotal - effectiveDiscountAmount;
-  const shippingCost = cartTotal < 899 && cartTotal > 0 ? 99 : 0;
+  const shippingCost = 0;
   const finalTotal = subTotalAfterDiscount + shippingCost;
 
   const handleApplyCoupon = async () => {
@@ -202,20 +205,31 @@ export default function CheckoutPage() {
                 (async () => {
                   try {
                     if (saveAddressForFuture) {
-                      await setDoc(doc(db, 'users', user.uid), {
-                        savedAddress: formData,
-                        updatedAt: serverTimestamp()
-                      }, { merge: true });
+                      await supabase.from('customers').upsert({
+                        firebase_uid: user.uid,
+                        full_name: formData.fullName,
+                        email: formData.email,
+                        phone: formData.phone,
+                        saved_address: formData,
+                        updated_at: new Date().toISOString()
+                      }, { onConflict: 'firebase_uid' });
                     }
-                    await setDoc(doc(db, 'orders', verifyData.orderId), {
-                      ...verifyData.order,
-                      userId: user.uid,
-                      status: 'PAID',
-                      timestamp: serverTimestamp()
+                    await supabase.from('orders').insert({
+                      id: verifyData.orderId,
+                      tracking_id: verifyData.order.trackingId,
+                      firebase_uid: user.uid,
+                      items: cartItems,
+                      shipping_address: formData,
+                      total_amount: finalTotal,
+                      discount_amount: effectiveDiscountAmount,
+                      shipping_cost: shippingCost,
+                      payment_status: 'PAID',
+                      order_status: 'Processing',
+                      created_at: new Date().toISOString()
                     });
-                    console.log('[Firestore] Order & address saved');
+                    console.log('[Supabase] Order & address saved');
                   } catch (err) {
-                    console.error('[Firestore] Failed to save order/address:', err);
+                    console.error('[Supabase] Failed to save order/address:', err);
                   }
                 })();
               }
