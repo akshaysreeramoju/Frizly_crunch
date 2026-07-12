@@ -100,9 +100,11 @@ export async function POST(req: Request) {
         auth: { persistSession: false },
       });
 
+      let customerId = null;
+
       // Upsert customer record
       if (userId) {
-        const { error: custErr } = await adminClient.from('customers').upsert(
+        const { data: custData, error: custErr } = await adminClient.from('customers').upsert(
           {
             firebase_uid: userId,
             full_name: shippingAddress?.fullName,
@@ -112,10 +114,11 @@ export async function POST(req: Request) {
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'firebase_uid' }
-        );
+        ).select('id').single();
         if (custErr) {
           console.error('[verify-payment] ❌ Supabase customers upsert error:', custErr);
-        } else {
+        } else if (custData) {
+          customerId = custData.id;
           console.log(`[verify-payment] ✅ Supabase customer upserted for uid=${userId}`);
         }
       }
@@ -124,6 +127,7 @@ export async function POST(req: Request) {
       const { error: orderErr } = await adminClient.from('orders').insert({
         id: orderId,
         tracking_id: trackingId,
+        customer_id: customerId,
         firebase_uid: userId || 'guest',
         items,
         shipping_address: shippingAddress,

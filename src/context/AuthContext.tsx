@@ -108,6 +108,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               phoneNumber: firebaseUser.phoneNumber,
               photoURL: firebaseUser.photoURL,
             });
+            // Sync user to Supabase
+            fetch('/api/user/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL,
+              })
+            }).catch(err => console.error('[AuthContext] Failed to sync user to Supabase:', err));
           } else {
             setUser(null);
           }
