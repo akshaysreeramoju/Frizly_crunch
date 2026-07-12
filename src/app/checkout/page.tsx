@@ -7,9 +7,9 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
-import { ShieldCheck, Truck, Gift, Lock } from 'lucide-react';
+import { ShieldCheck, Truck, Gift } from 'lucide-react';
 import { LAUNCH_TIERS } from '@/lib/coupons';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase'; // still used to pre-fill saved address
 
 declare global {
   interface Window {
@@ -199,41 +199,8 @@ export default function CheckoutPage() {
             clearTimeout(timeoutId);
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              // Fire-and-forget: save to Firestore in the background.
-              // Do NOT await — this must never block the redirect.
-              if (user && verifyData.order) {
-                (async () => {
-                  try {
-                    if (saveAddressForFuture) {
-                      await supabase.from('customers').upsert({
-                        firebase_uid: user.uid,
-                        full_name: formData.fullName,
-                        email: formData.email,
-                        phone: formData.phone,
-                        saved_address: formData,
-                        updated_at: new Date().toISOString()
-                      }, { onConflict: 'firebase_uid' });
-                    }
-                    await supabase.from('orders').insert({
-                      id: verifyData.orderId,
-                      tracking_id: verifyData.order.trackingId,
-                      firebase_uid: user.uid,
-                      items: cartItems,
-                      shipping_address: formData,
-                      total_amount: finalTotal,
-                      discount_amount: effectiveDiscountAmount,
-                      shipping_cost: shippingCost,
-                      payment_status: 'PAID',
-                      order_status: 'Processing',
-                      created_at: new Date().toISOString()
-                    });
-                    console.log('[Supabase] Order & address saved');
-                  } catch (err) {
-                    console.error('[Supabase] Failed to save order/address:', err);
-                  }
-                })();
-              }
-
+              // Supabase persistence is handled server-side in /api/razorpay/verify-payment.
+              // Nothing extra needed here — just redirect.
               toast('🎉 Payment successful! Order confirmed.');
               dispatch({ type: 'CLEAR_CART' });
               router.push(`/order/${verifyData.orderId}`);

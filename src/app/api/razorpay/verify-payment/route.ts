@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendCustomerWhatsAppConfirmation } from '@/lib/mailer';
 
 function generateOrderId() {
@@ -87,10 +88,64 @@ export async function POST(req: Request) {
       console.warn('[verify-payment] orders.json write skipped (Vercel read-only FS):', (fsError as Error).message);
     }
 
+    // --- Persist to Supabase (server-side, using service-role key to bypass RLS) ---
+    // We do this server-side so it always runs, regardless of client auth state.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY; // fallback to the secret key in .env.local
+
+    if (supabaseUrl && supabaseServiceKey) {
+      const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { persistSession: false },
+      });
+
+      // Upsert customer record
+      if (userId) {
+        const { error: custErr } = await adminClient.from('customers').upsert(
+          {
+            firebase_uid: userId,
+            full_name: shippingAddress?.fullName,
+            email: shippingAddress?.email,
+            phone: shippingAddress?.phone,
+            saved_address: shippingAddress,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'firebase_uid' }
+        );
+        if (custErr) {
+          console.error('[verify-payment] ❌ Supabase customers upsert error:', custErr);
+        } else {
+          console.log(`[verify-payment] ✅ Supabase customer upserted for uid=${userId}`);
+        }
+      }
+
+      // Insert order record
+      const { error: orderErr } = await adminClient.from('orders').insert({
+        id: orderId,
+        tracking_id: trackingId,
+        firebase_uid: userId || 'guest',
+        items,
+        shipping_address: shippingAddress,
+        total_amount: total,
+        discount_amount: discountAmount || 0,
+        shipping_cost: shippingCost || 0,
+        payment_status: 'PAID',
+        order_status: 'Processing',
+        created_at: new Date().toISOString(),
+      });
+      if (orderErr) {
+        console.error('[verify-payment] ❌ Supabase orders insert error:', orderErr);
+      } else {
+        console.log(`[verify-payment] ✅ Supabase order saved: ${orderId}`);
+      }
+    } else {
+      console.error('[verify-payment] ⚠️ Supabase env vars missing — skipping DB write.');
+    }
+
     // --- Send notifications then respond ---
     // Emails are raced against an 8-second deadline so the API always
     // responds promptly and the user is never stuck on "Processing…".
-    // SMTP typically finishes within 3-5s; the race just provides a safety net.
     console.log('[verify-payment] Starting email notifications...');
     console.log(`[verify-payment] SMTP_USER=${process.env.SMTP_USER ? 'SET' : 'NOT SET'}, ADMIN_EMAIL=${process.env.ADMIN_EMAIL || 'hello@frizlycrunch.com (default)'}`);
 
@@ -113,7 +168,7 @@ export async function POST(req: Request) {
     ]);
 
     console.log(`[verify-payment] Responding with success for order ${orderId}`);
-    // Return full order data so client can persist it to Firestore
+    // Return full order object so client-side can display the confirmation page
     return NextResponse.json({ success: true, orderId, order });
 
   } catch (error) {

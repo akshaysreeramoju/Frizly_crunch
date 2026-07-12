@@ -3,38 +3,33 @@
  *
  * Email notification utility for Frizly Crunch order system.
  *
- * Supports two backends — configure via environment variables:
- *   Option A (Gmail/SMTP): set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
- *   Option B (Resend):     set RESEND_API_KEY
+ * Preferred backend (works on Vercel — uses HTTPS, not SMTP):
+ *   Set RESEND_API_KEY in your .env.local and Vercel dashboard.
+ *   Sign up at https://resend.com, verify frizlycrunch.com, then generate an API key.
+ *   From address must be a verified domain (e.g. orders@frizlycrunch.com).
+ *
+ * Fallback backend (local dev only — Vercel blocks outbound SMTP 587):
+ *   Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS for Gmail/SMTP.
  *
  * Required env vars:
- *   ADMIN_EMAIL           — Where admin order alerts are sent
- *   SMTP_USER             — Gmail / SMTP sender address (Option A)
- *   SMTP_PASS             — Gmail App Password (Option A)
- *   RESEND_API_KEY        — Resend API key (Option B)
+ *   ADMIN_EMAIL           — Where admin order alerts are sent (hello@frizlycrunch.com)
+ *   RESEND_API_KEY        — Resend API key (preferred for production)
+ *   SMTP_USER / SMTP_PASS — Gmail App Password (fallback, local dev only)
  */
 
+import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { SITE_CONFIG } from './siteConfig';
 
 // ---------------------------------------------------------------------------
-// Transporter setup
+// Email send helper — Resend SDK (HTTPS) or SMTP fallback
 // ---------------------------------------------------------------------------
-function createTransporter() {
-  // Option B: Resend (preferred for production — use SMTP relay)
-  if (process.env.RESEND_API_KEY) {
-    return nodemailer.createTransport({
-      host: 'smtp.resend.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: 'resend',
-        pass: process.env.RESEND_API_KEY,
-      },
-    });
-  }
 
-  // Option A: Gmail / custom SMTP
+// Resend SDK instance (only created when API key is available)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// SMTP transporter for local-dev fallback
+function createSmtpTransporter() {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
@@ -46,10 +41,43 @@ function createTransporter() {
   });
 }
 
-// When using Resend, the sender must be a verified domain address (not Gmail).
-const FROM_ADDRESS = process.env.RESEND_API_KEY
+// When using Resend, sender must be a verified domain address.
+// When using SMTP, it's the authenticated Gmail account.
+const FROM_ADDRESS = resend
   ? `"Frizly Crunch" <orders@frizlycrunch.com>`
   : `"Frizly Crunch" <${process.env.SMTP_USER || 'orders@frizlycrunch.com'}>`;
+
+// ---------------------------------------------------------------------------
+// Core sendMail wrapper — routes to Resend or nodemailer
+// ---------------------------------------------------------------------------
+async function sendMail(options: { to: string; subject: string; html: string; replyTo?: string }) {
+  if (resend) {
+    // Production path: Resend SDK over HTTPS (works on Vercel)
+    const result = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      ...(options.replyTo ? { replyTo: options.replyTo } : {}),
+    });
+    if (result.error) {
+      throw new Error(`Resend error: ${result.error.message}`);
+    }
+    return result;
+  } else if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    // Local dev fallback: nodemailer over SMTP
+    const transporter = createSmtpTransporter();
+    return transporter.sendMail({
+      from: FROM_ADDRESS,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      ...(options.replyTo ? { replyTo: options.replyTo } : {}),
+    });
+  } else {
+    console.warn('[Mailer] No email credentials configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS). Skipping email.');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Shared email styles (inline for email client compatibility)
@@ -105,7 +133,6 @@ export async function sendCustomerOrderConfirmation(order: {
     return;
   }
 
-  const transporter = createTransporter();
   const { shippingAddress: addr } = order;
   const firstName = addr.fullName.split(' ')[0];
   const subtotal = order.total - (order.shippingCost || 0) + (order.discountAmount || 0);
@@ -261,8 +288,7 @@ export async function sendCustomerOrderConfirmation(order: {
 </body>
 </html>`;
 
-  await transporter.sendMail({
-    from: FROM_ADDRESS,
+  await sendMail({
     to: customerEmail,
     subject: `✅ Order Confirmed — ${order.id} | Frizly Crunch`,
     html,
@@ -297,7 +323,6 @@ export async function sendAdminOrderNotification(order: {
     return;
   }
 
-  const transporter = createTransporter();
   const { shippingAddress: addr } = order;
   const subtotal = order.total - (order.shippingCost || 0) + (order.discountAmount || 0);
   const orderDate = new Date(order.createdAt).toLocaleString('en-IN', {
@@ -432,8 +457,7 @@ export async function sendAdminOrderNotification(order: {
 </body>
 </html>`;
 
-  await transporter.sendMail({
-    from: FROM_ADDRESS,
+  await sendMail({
     to: adminEmail,
     subject: `🛒 New Order ${order.id} — ₹${order.total.toLocaleString('en-IN')} — ${addr.fullName}`,
     html,
@@ -456,8 +480,6 @@ export async function sendShippingUpdateEmail(order: {
   if (!customerEmail) return;
 
   if (!process.env.SMTP_USER && !process.env.RESEND_API_KEY) return;
-
-  const transporter = createTransporter();
 
   const html = `
 <!DOCTYPE html>
@@ -487,8 +509,7 @@ export async function sendShippingUpdateEmail(order: {
 </body>
 </html>`;
 
-  await transporter.sendMail({
-    from: FROM_ADDRESS,
+  await sendMail({
     to: customerEmail,
     subject: `🚚 Your Frizly Crunch order ${order.id} is shipped!`,
     html,
@@ -508,8 +529,6 @@ export async function sendContactFormNotification(data: {
   if (!adminEmail) return;
 
   if (!process.env.SMTP_USER && !process.env.RESEND_API_KEY) return;
-
-  const transporter = createTransporter();
 
   const html = `
 <!DOCTYPE html>
@@ -531,12 +550,11 @@ export async function sendContactFormNotification(data: {
 </body>
 </html>`;
 
-  await transporter.sendMail({
-    from: FROM_ADDRESS,
+  await sendMail({
     to: adminEmail,
-    replyTo: data.email,
     subject: `New Message from ${data.name}: ${data.subject}`,
     html,
+    replyTo: data.email,
   });
   console.log('[Mailer] Contact form notification sent to admin');
 }
